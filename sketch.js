@@ -2,7 +2,7 @@ var player;
 var arrows = [];
 var spiders = [];
 var zoom = 100;
-var arrowVelocity = 8.2;    
+var arrowVelocity = 8.2;
 var paused = false;
 var gameOver = false;
 var bug;
@@ -22,7 +22,7 @@ function setup() {
 }
 
 function draw() {
-  background(53,95,61);
+  background(53, 95, 61);
 
   for (let i = 0; i < grass.length; i++) {
     grass[i].draw();
@@ -131,17 +131,18 @@ function draw() {
 
   // Draw arrow velocity bar
   push();
-  fill(255,150);
+  fill(255, 150);
   noStroke();
   rectMode(CORNER);
-  rect(width/4, 45, width/6, 8);
+  rect(width / 4, 45, width / 6, 8);
   fill(170, 0, 0, 150);
-  let barFill = map(arrowVelocity, 1, 40, 0, width/6);
-  rect(width/4, 45, barFill, 8);
+  let barFill = map(arrowVelocity, 1, 40, 0, width / 6);
+  rect(width / 4, 45, barFill, 8);
   pop();
 
   if (paused) {
     push();
+    cursor();
     fill(255, 80);
     noStroke();
     rectMode(CENTER);
@@ -187,16 +188,31 @@ function keyPressed() {
 
 function mouseReleased() {
   player.shoot(mouseX, mouseY, arrowVelocity);
-  arrowVelocity = map(player.size, 20, 150, 5, 20);  
+  arrowVelocity = map(player.size, 20, 150, 5, 20);
 }
 
 function mouseWheel(event) {
   if (event.delta > 0) {
     zoom = Math.max(40, zoom - (0.25 * event.delta));
-    arrowVelocity = map(player.size, 20, 150, 5, 20);    
+    arrowVelocity = map(player.size, 20, 150, 5, 20);
   } else {
     zoom = Math.min(300, zoom - (0.25 * event.delta));
-    arrowVelocity = map(player.size, 20, 150, 5, 20);    
+    arrowVelocity = map(player.size, 20, 150, 5, 20);
   }
   return false;
+}
+
+function mouseClicked() {
+  if (gameOver && mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > height / 2 + 45 && mouseY < height / 2 + 85) {
+    player.size = 50;
+    arrows = [];
+    spiders = [];
+    zoom = 100;
+    arrowVelocity = 8.2;
+    paused = false;
+    gameOver = false;
+    grass = [];
+    setup();
+    loop();
+  }
 }
