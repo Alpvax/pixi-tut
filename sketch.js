@@ -145,7 +145,6 @@ function draw() {
 
   if (paused) {
     push();
-    cursor();
     fill(255, 80);
     noStroke();
     rectMode(CENTER);
@@ -203,9 +202,11 @@ function keyPressed() {
   if (key == 'P') {
     if (paused) {
       paused = false;
+      noCursor();
       loop();
     } else {
       paused = true;
+      cursor();
       noLoop();
     }
   }
