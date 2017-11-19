@@ -1,7 +1,7 @@
 function Spider(x, y) {
   this.pos = createVector(x, y);
   this.size = Math.max(Math.ceil(Math.random() * 10) * 10, 32);
-  this.vel = (20 + Math.pow((player.score + 1), 1.2))/ this.size;
+  this.vel = Math.min((20 + Math.pow((player.score + 1), 1.2))/ this.size, 8);
   this.dead = false;
   this.opacity = 255;
   this.hit = false;
