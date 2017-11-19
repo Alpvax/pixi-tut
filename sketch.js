@@ -20,7 +20,7 @@ function setup() {
   for (let i = 0; i < 12; i++) {
     grass[i] = new Tuft(random(width), random(height));
   }
-  bow = new Bow(windowWidth, windowHeight);  
+  bow = new Bow(windowWidth, windowHeight);
 }
 
 function draw() {
@@ -177,7 +177,24 @@ function draw() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(windowWidth, windowHeight, true);
+  if (paused) {
+    push();
+    fill(130, 80);
+    noStroke();
+    rectMode(CENTER);
+    rect(width / 2, height / 2, 800, 450);
+    stroke(0);
+    fill(0);
+    textAlign(CENTER);
+    textSize(40);
+    text("Game is paused.\nPress P to unpause.", width / 2, height / 2);
+    textSize(20);
+    fill(100);
+    stroke(100);
+    text("Everything is white because the game doesn't redraw when paused.\nIf it does, the spiders advance 1 frame for every pixel your window resizes!", width / 2, height / 2 + 120);
+    pop();
+  }
 }
 
 function keyPressed() {
