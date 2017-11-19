@@ -205,6 +205,9 @@ function keyPressed() {
       noCursor();
       loop();
     } else {
+      if (mouseIsPressed) {
+        player.shoot(mouseX, mouseY, arrowVelocity);
+      }
       paused = true;
       cursor();
       noLoop();
