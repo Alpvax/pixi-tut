@@ -207,6 +207,7 @@ function keyPressed() {
     } else {
       if (mouseIsPressed) {
         player.shoot(mouseX, mouseY, arrowVelocity);
+        arrowVelocity = map(player.size, 20, 150, 5, 20);        
       }
       paused = true;
       cursor();
