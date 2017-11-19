@@ -180,6 +180,8 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight, true);
   if (paused) {
     push();
+    imageMode(CENTER);
+    image(bug, width / 2, height / 2 - 120, 100, 100);
     fill(130, 80);
     noStroke();
     rectMode(CENTER);
