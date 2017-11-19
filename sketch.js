@@ -213,8 +213,10 @@ function keyPressed() {
 }
 
 function mouseReleased() {
-  player.shoot(mouseX, mouseY, arrowVelocity);
-  arrowVelocity = map(player.size, 20, 150, 5, 20);
+  if (!paused) {
+    player.shoot(mouseX, mouseY, arrowVelocity);
+    arrowVelocity = map(player.size, 20, 150, 5, 20);
+  }
 }
 
 function mouseWheel(event) {
