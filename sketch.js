@@ -7,6 +7,7 @@ var paused = false;
 var gameOver = false;
 var bug;
 var grass = [];
+var bow;
 
 function preload() {
   bug = loadImage("./Bug.png");
@@ -19,6 +20,7 @@ function setup() {
   for (let i = 0; i < 12; i++) {
     grass[i] = new Tuft(random(width), random(height));
   }
+  bow = new Bow(windowWidth, windowHeight);  
 }
 
 function draw() {
@@ -128,6 +130,7 @@ function draw() {
   }
 
   player.drawScore();
+  bow.draw(arrowVelocity);
 
   // Draw arrow velocity bar
   push();
@@ -166,6 +169,9 @@ function draw() {
 
   if (mouseIsPressed) {
     arrowVelocity = Math.min(arrowVelocity *= 1.01, 40);
+    if (!paused) {
+      bow.draw(arrowVelocity);
+    }
   }
 
 }
