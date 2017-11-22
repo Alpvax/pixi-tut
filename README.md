@@ -1,4 +1,4 @@
-# [Spindelspel "Play Game"](https://Trymunx.github.io/Spindelspel)
+# [Spindelspel](https://Trymunx.github.io/Spindelspel "Play Game")
 A simple game made using p5.js
 
 Use the arrow keys or WASD to move, the mouse to aim and fire arrows and P to pause.
