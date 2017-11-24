@@ -14,7 +14,7 @@ function Arrow(startX, startY, clickX, clickY, velocity) {
     this.tip.x += this.vel * this.sinAngle;
     this.tip.y += this.vel * this.cosAngle;
     this.arrowTip.update(this.vel, this.sinAngle, this.cosAngle);
-    this.vel -= 0.05;
+    this.vel -= 0.85 / Math.pow(this.vel, 0.95);
   }
 
   this.draw = () => {
