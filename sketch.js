@@ -72,7 +72,7 @@ function draw() {
     if (arrows[i].base.x < 0 || arrows[i].base.x > width || arrows[i].base.y < 0 || arrows[i].base.y > height || arrows[i].vel <= 0) {
       arrows.splice(i, 1);
     } else {
-      arrows[i].update();
+      if (!paused && !gameOver) { arrows[i].update(); }
       arrows[i].draw();
     }
   }
@@ -100,7 +100,7 @@ function draw() {
       spiders.splice(i, 1);
     }
     if (spiders[i]) {
-      spiders[i].update(player.pos.x, player.pos.y);
+      if (!paused && !gameOver) { spiders[i].update(player.pos.x, player.pos.y); }
       spiders[i].draw(bug, player.pos.x, player.pos.y);
     }
   }
@@ -176,26 +176,7 @@ function draw() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight, true);
-  if (paused) {
-    push();
-    imageMode(CENTER);
-    image(bug, width / 2, height / 2 - 120, 100, 100);
-    fill(130, 80);
-    noStroke();
-    rectMode(CENTER);
-    rect(width / 2, height / 2, 800, 450);
-    stroke(0);
-    fill(0);
-    textAlign(CENTER);
-    textSize(40);
-    text("Game is paused.\nPress P to unpause.", width / 2, height / 2);
-    textSize(20);
-    fill(100);
-    stroke(100);
-    text("Everything is white because the game doesn't redraw when paused.\nIf it does, the spiders advance 1 frame for every pixel your window resizes!", width / 2, height / 2 + 120);
-    pop();
-  }
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 function keyPressed() {
@@ -207,7 +188,7 @@ function keyPressed() {
     } else {
       if (mouseIsPressed) {
         player.shoot(mouseX, mouseY, arrowVelocity);
-        arrowVelocity = map(player.size, 20, 150, 5, 20);        
+        arrowVelocity = map(player.size, 20, 150, 5, 20);
       }
       paused = true;
       cursor();
