@@ -32,40 +32,38 @@ function draw() {
 
   player.draw();
 
-  if (spiders.length < Math.max(15, player.score / 4)) {
-    if (Math.random() * (player.score / 1500 + 1) > 0.995) {
-      let spiderX;
-      let spiderY;
-      let randomEdge = Math.floor(Math.random() * 4);
-      do {
-        switch (randomEdge) {
-          case 0:
-            // Left hand edge of screen
-            spiderX = 0;
-            spiderY = Math.floor(Math.random() * height);
-            break;
-          case 1:
-            // Right hand edge of screen
-            spiderX = width;
-            spiderY = Math.floor(Math.random() * height);
-            break;
-          case 2:
-            // Top edge of screen
-            spiderX = Math.floor(Math.random() * width);
-            spiderY = 0;
-            break;
-          case 3:
-            // Bottom edge of screen
-            spiderX = Math.floor(Math.random() * width);
-            spiderY = height;
-            break;
-          default:
-            print("Undefined edge: " + randomEdge);
-            break;
-        }
-      } while (dist(spiderX, spiderY, player.pos.x, player.pos.y) <= 200);
-      spiders.push(new Spider(spiderX, spiderY));
-    }
+  if (spiders.length < Math.max(15, player.score / 4) && Math.random() * (player.score / 1500 + 1) > 0.995) {
+    let spiderX;
+    let spiderY;
+    let randomEdge = Math.floor(Math.random() * 4);
+    do {
+      switch (randomEdge) {
+        case 0:
+          // Left hand edge of screen
+          spiderX = 0;
+          spiderY = Math.floor(Math.random() * height);
+          break;
+        case 1:
+          // Right hand edge of screen
+          spiderX = width;
+          spiderY = Math.floor(Math.random() * height);
+          break;
+        case 2:
+          // Top edge of screen
+          spiderX = Math.floor(Math.random() * width);
+          spiderY = 0;
+          break;
+        case 3:
+          // Bottom edge of screen
+          spiderX = Math.floor(Math.random() * width);
+          spiderY = height;
+          break;
+        default:
+          print("Undefined edge: " + randomEdge);
+          break;
+      }
+    } while (dist(spiderX, spiderY, player.pos.x, player.pos.y) <= 200);
+    spiders.push(new Spider(spiderX, spiderY));
   }
 
   for (let i = arrows.length - 1; i >= 0; i--) {
