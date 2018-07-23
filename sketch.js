@@ -227,3 +227,23 @@ function mouseClicked() {
     loop();
   }
 }
+
+function touchEnded() {
+  if (gameOver && mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > height / 2 + 45 && mouseY < height / 2 + 85) {
+    player.size = 50;
+    arrows = [];
+    spiders = [];
+    zoom = 100;
+    arrowVelocity = 8.2;
+    paused = false;
+    gameOver = false;
+    grass = [];
+    setup();
+    loop();
+  } else {
+    if (!paused) {
+      player.shoot(mouseX, mouseY, arrowVelocity);
+      arrowVelocity = map(player.size, 20, 150, 5, 20);
+    }
+  }
+}
