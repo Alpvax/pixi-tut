@@ -18,7 +18,7 @@ app.renderer.resize(window.innerWidth, window.innerHeight);
 
 loader.add("Bug.png").load(setup);
 function setup() {
-  
+
   spiderSprite = new Sprite(resources["Bug.png"].texture);
   spiderSprite.vel = {x: 0, y: 0};
 
@@ -28,13 +28,29 @@ function setup() {
       up    = keyboard(87),
       down  = keyboard(83);
 
-  //Left arrow key `press` method
+  function velocityKB (keybind, x, y) {
+    keybind.press = () => {
+      spiderSprite.vel.x += x;
+      spiderSprite.vel.y += y;
+    }
+    keybind.release = () => {
+      spiderSprite.vel.x -= x;
+      spiderSprite.vel.y -= y;
+    }
+  }
+
+  velocityKB(left,  -5, 0);
+  velocityKB(right, 5,  0);
+  velocityKB(up,    0,  -5);
+  velocityKB(down,  0,  5);
+
+  /*//Left arrow key `press` method
   left.press = () => {
     //Change the spiderSprite's velocity when the key is pressed
     spiderSprite.vel.x = -5;
     spiderSprite.vel.y = 0;
   };
-  
+
   //Left arrow key `release` method
   left.release = () => {
     //If the left arrow has been released, and the right arrow isn't down,
@@ -76,7 +92,7 @@ function setup() {
     if (!up.isDown && spiderSprite.vel.x === 0) {
       spiderSprite.vel.y = 0;
     }
-  };
+  };*/
 
   spiderSprite.pivot.set(25, 0);
   spiderSprite.position.set(app.view.width / 2, app.view.height / 2);
