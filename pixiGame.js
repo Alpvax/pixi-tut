@@ -23,76 +23,33 @@ function setup() {
   spiderSprite.vel = {x: 0, y: 0};
 
   // Input
-  let left  = keyboard(65),
-      right = keyboard(68),
-      up    = keyboard(87),
-      down  = keyboard(83);
+  let left  = keyboard(/[aA]/, "ArrowLeft"),
+      right = keyboard(/[dD]/, "ArrowRight"),
+      up    = keyboard(/[wW]/, "ArrowUp"),
+      down  = keyboard(/[sS]/, "ArrowDown");
 
-  function velocityKB (keybind, x, y) {
-    keybind.press = () => {
-      spiderSprite.vel.x += x;
-      spiderSprite.vel.y += y;
-    }
-    keybind.release = () => {
-      spiderSprite.vel.x -= x;
-      spiderSprite.vel.y -= y;
+  const speed = 5; //Max speed
+
+  function updateVelocity() {
+    let h = 0;
+    let v = 0;
+    if(left.isDown)   h -= 1;
+    if(right.isDown)  h += 1;
+    if(up.isDown)     v -= 1;
+    if(down.isDown)   v += 1;
+    let modifier = (h != 0 && v != 0) ? //Moving in both axes
+          speed / Math.sqrt(2) : //adjust for diagonal movement (currently only 8-directional movement)
+          speed; //Otherwise speed value can be used directly
+    spiderSprite.vel.x = h * modifier;
+    spiderSprite.vel.y = v * modifier;
+    if(h != 0 || v != 0) { //If moving
+      spiderSprite.rotation = (Math.PI / 2) + Math.atan2(v, h);
     }
   }
 
-  velocityKB(left,  -5, 0);
-  velocityKB(right, 5,  0);
-  velocityKB(up,    0,  -5);
-  velocityKB(down,  0,  5);
-
-  /*//Left arrow key `press` method
-  left.press = () => {
-    //Change the spiderSprite's velocity when the key is pressed
-    spiderSprite.vel.x = -5;
-    spiderSprite.vel.y = 0;
-  };
-
-  //Left arrow key `release` method
-  left.release = () => {
-    //If the left arrow has been released, and the right arrow isn't down,
-    //and the spiderSprite isn't moving vertically:
-    //Stop the spiderSprite
-    if (!right.isDown && spiderSprite.vel.y === 0) {
-      spiderSprite.vel.x = 0;
-    }
-  };
-
-  //Up
-  up.press = () => {
-    spiderSprite.vel.y = -5;
-    spiderSprite.vel.x = 0;
-  };
-  up.release = () => {
-    if (!down.isDown && spiderSprite.vel.x === 0) {
-      spiderSprite.vel.y = 0;
-    }
-  };
-
-  //Right
-  right.press = () => {
-    spiderSprite.vel.x = 5;
-    spiderSprite.vel.y = 0;
-  };
-  right.release = () => {
-    if (!left.isDown && spiderSprite.vel.y === 0) {
-      spiderSprite.vel.x = 0;
-    }
-  };
-
-  //Down
-  down.press = () => {
-    spiderSprite.vel.y = 5;
-    spiderSprite.vel.x = 0;
-  };
-  down.release = () => {
-    if (!up.isDown && spiderSprite.vel.x === 0) {
-      spiderSprite.vel.y = 0;
-    }
-  };*/
+  [left, right, up, down].forEach((kb) => {
+    kb.press = kb.release = updateVelocity;
+  });
 
   spiderSprite.pivot.set(25, 0);
   spiderSprite.position.set(app.view.width / 2, app.view.height / 2);
@@ -118,9 +75,42 @@ function play(delta) {
   spiderSprite.y += spiderSprite.vel.y;
 }
 
-function keyboard(keyCode) {
-  let key = {};
-  key.code = keyCode;
+function escapeRegexChars(string) {
+  let specialChars = [ "$", "^", "*", "(", ")", "+", "[", "]", "{", "}", "\\", "|", ".", "?", "/" ];
+  let regex = new RegExp("(\\" + specialChars.join("|\\") + ")", "g");
+  return string.replace(regex, "\\$1");
+}
+
+function keyboard(...labels) {
+  if(!labels) {
+    console.warn(`Tried to register a keybind with no keys defined`);
+  }
+  let re = new RegExp("^(?:" + labels.map((l) => l instanceof RegExp ? l.source : l).join("|") + ")$");
+  let key = {
+    matcher: re,
+    isDown: false,
+    press: undefined,
+    release: undefined,
+    downHandler: (event) => {
+      if(key.matcher.test(event.key) && !key.isDown) {
+        key.isDown = true;
+        if(key.press) {
+          key.press(event.key);
+        }
+      }
+      event.preventDefault();
+    },
+    upHandler: (event) => {
+      if(key.matcher.test(event.key) && key.isDown) {
+        key.isDown = false;
+        if(key.release) {
+          key.release(event.key);
+        }
+      }
+      event.preventDefault();
+    }
+  };
+  /*key.code = keyCode;
   key.isDown = false;
   key.isUp = true;
   key.press = undefined;
@@ -128,9 +118,8 @@ function keyboard(keyCode) {
   //The `downHandler`
   key.downHandler = event => {
     if (event.keyCode === key.code) {
-      if (key.isUp && key.press) key.press();
+      if (!key.isDown && key.press) key.press();
       key.isDown = true;
-      key.isUp = false;
     }
     event.preventDefault();
   };
@@ -140,10 +129,9 @@ function keyboard(keyCode) {
     if (event.keyCode === key.code) {
       if (key.isDown && key.release) key.release();
       key.isDown = false;
-      key.isUp = true;
     }
     event.preventDefault();
-  };
+  };*/
 
   //Attach event listeners
   window.addEventListener(
