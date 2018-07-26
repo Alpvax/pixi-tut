@@ -7,6 +7,10 @@ let Application = PIXI.Application,
 let spiderSprite;
 let state = play;
 
+const speed = 5; //Max speed
+//const rotSpeed = 2* Math.PI / (fps * rpm)
+const rotSpeed = Math.PI / 30; //PI/30 = 1 full revolution per second maximum at 60FPS.
+
 let app = new Application({width: 400, height: 400});
 document.body.appendChild(app.view);
 
@@ -32,8 +36,6 @@ function setup() {
       up    = keyboard(/[wW]/, "ArrowUp"),
       down  = keyboard(/[sS]/, "ArrowDown");
 
-  const speed = 5; //Max speed
-
   function updateVelocity() {
     let h = 0;
     let v = 0;
@@ -58,17 +60,28 @@ function setup() {
   spiderSprite.anchor.set(0.5, 0.5);
   spiderSprite.position.set(app.view.width / 2, app.view.height / 2);
   spiderSprite.scale.set(2);
-  spiderSprite.rotation = Math.PI;
+  spiderSprite.rotation = spiderSprite.targetRotation = Math.PI;
   app.stage.addChild(spiderSprite);
 
   app.ticker.add(delta => gameLoop(delta));
 }
 
+function rotateToPoint(sprite, point) {
+  let x = point.x - sprite.x;
+  let y = point.y - sprite.y;
+  sprite.targetRotation = (Math.PI / 2) + Math.atan2(y, x)
+  //sprite.targetRotation = Math.atan2(Math.sin(x-y), Math.cos(x-y));
+}
+
 function updateRotation(sprite) {
-  let mpos = app.renderer.plugins.interaction.mouse.global;
-  let x = mpos.x - sprite.x;
-  let y = mpos.y - sprite.y;
-  sprite.rotation = (Math.PI / 2) + Math.atan2(y, x);
+  let t = sprite.targetRotation;
+  let c = sprite.rotation
+  let delta = Math.atan2(Math.sin(t-c), Math.cos(t-c));
+  if(Math.abs(delta) < rotSpeed) {
+    sprite.rotation = sprite.targetRotation;
+  } else {
+    sprite.rotation += Math.sign(delta) * rotSpeed;
+  }
 }
 
 function gameLoop(delta) {
@@ -76,11 +89,7 @@ function gameLoop(delta) {
 }
 
 function play(delta) {
-  // spiderSprite.x += Math.round(Math.random() * 2 * delta - 1);
-  // spiderSprite.x = spiderSprite.x >= app.stage.width ? spiderSprite.x + 1 : spiderSprite.x - 1000;
-
-  // spiderSprite.vel.x = Math.random() - 0.5;
-  // spiderSprite.vel.y = Math.random() - 0.5;
+  rotateToPoint(spiderSprite, app.renderer.plugins.interaction.mouse.global);
 
   spiderSprite.x += spiderSprite.vel.x;
   spiderSprite.y += spiderSprite.vel.y;
