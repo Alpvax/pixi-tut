@@ -16,7 +16,11 @@ app.renderer.view.style.display = "block";
 app.renderer.autoresize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
 
-loader.add("Bug.png").load(setup);
+loader.add("Bug.png")
+  .on("progress", (loader, resource) => {
+    console.debug(`Loading: ${loader.progress}%. Loaded ${resource.url}`);
+  })
+  .load(setup);
 function setup() {
 
   spiderSprite = new Sprite(resources["Bug.png"].texture);
@@ -42,22 +46,29 @@ function setup() {
           speed; //Otherwise speed value can be used directly
     spiderSprite.vel.x = h * modifier;
     spiderSprite.vel.y = v * modifier;
-    if(h != 0 || v != 0) { //If moving
+    /*if(h != 0 || v != 0) { //If moving
       spiderSprite.rotation = (Math.PI / 2) + Math.atan2(v, h);
-    }
+    }*/
   }
 
   [left, right, up, down].forEach((kb) => {
     kb.press = kb.release = updateVelocity;
   });
 
-  spiderSprite.pivot.set(25, 0);
+  spiderSprite.anchor.set(0.5, 0.5);
   spiderSprite.position.set(app.view.width / 2, app.view.height / 2);
   spiderSprite.scale.set(2);
   spiderSprite.rotation = Math.PI;
   app.stage.addChild(spiderSprite);
 
   app.ticker.add(delta => gameLoop(delta));
+}
+
+function updateRotation(sprite) {
+  let mpos = app.renderer.plugins.interaction.mouse.global;
+  let x = mpos.x - sprite.x;
+  let y = mpos.y - sprite.y;
+  sprite.rotation = (Math.PI / 2) + Math.atan2(y, x);
 }
 
 function gameLoop(delta) {
@@ -73,6 +84,7 @@ function play(delta) {
 
   spiderSprite.x += spiderSprite.vel.x;
   spiderSprite.y += spiderSprite.vel.y;
+  updateRotation(spiderSprite);
 }
 
 function escapeRegexChars(string) {
