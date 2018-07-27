@@ -10,9 +10,12 @@ let state = play;
 const speed = 5; //Max speed
 //const rotSpeed = 2* Math.PI / (fps * rpm)
 const rotSpeed = Math.PI / 30; //PI/30 = 1 full revolution per second maximum at 60FPS.
+let rotMod = 1;
 
 let app = new Application({width: 400, height: 400});
 document.body.appendChild(app.view);
+
+let interaction = app.renderer.plugins.interaction;
 
 app.renderer.backgroundColor = 0xcecece;
 app.renderer.view.style.position = "absolute";
@@ -57,6 +60,10 @@ function setup() {
     kb.press = kb.release = updateVelocity;
   });
 
+  // Pointers normalize touch and mouse
+  interaction.on('pointerdown', () => {rotMod = 1/2;});
+  interaction.on('pointerup', () => {rotMod = 1;});
+
   spiderSprite.anchor.set(0.5, 0.5);
   spiderSprite.position.set(app.view.width / 2, app.view.height / 2);
   spiderSprite.scale.set(2);
@@ -77,10 +84,11 @@ function updateRotation(sprite) {
   let t = sprite.targetRotation;
   let c = sprite.rotation
   let delta = Math.atan2(Math.sin(t-c), Math.cos(t-c));
-  if(Math.abs(delta) < rotSpeed) {
+  let r = rotSpeed * rotMod;
+  if(Math.abs(delta) < r) {
     sprite.rotation = sprite.targetRotation;
   } else {
-    sprite.rotation += Math.sign(delta) * rotSpeed;
+    sprite.rotation += Math.sign(delta) * r;
   }
 }
 
@@ -89,7 +97,7 @@ function gameLoop(delta) {
 }
 
 function play(delta) {
-  rotateToPoint(spiderSprite, app.renderer.plugins.interaction.mouse.global);
+  rotateToPoint(spiderSprite, interaction.mouse.global);
 
   spiderSprite.x += spiderSprite.vel.x;
   spiderSprite.y += spiderSprite.vel.y;
