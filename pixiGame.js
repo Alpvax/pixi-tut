@@ -1,20 +1,9 @@
 // Aliases
-let Application = PIXI.Application,
-    loader = PIXI.loader,
-    resources = PIXI.loader.resources,
-    Sprite = PIXI.Sprite;
+const loader = PIXI.loader,
+    resources = PIXI.loader.resources;
 
-let spiderSprite;
-let state = play;
-
-const speed = 5; //Max speed
-//const rotSpeed = 2* Math.PI / (fps * rpm)
-const rotSpeed = Math.PI / 30; //PI/30 = 1 full revolution per second maximum at 60FPS.
-let rotMod = 1;
-
-let app = new Application({width: 400, height: 400});
+let app = new PIXI.Application({width: 400, height: 400});
 document.body.appendChild(app.view);
-
 let interaction = app.renderer.plugins.interaction;
 
 app.renderer.backgroundColor = 0xcecece;
@@ -23,15 +12,24 @@ app.renderer.view.style.display = "block";
 app.renderer.autoresize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
 
+let player;
+let state = play;
+
 loader.add("Bug.png")
   .on("progress", (loader, resource) => {
     console.debug(`Loading: ${loader.progress}%. Loaded ${resource.url}`);
   })
   .load(setup);
-function setup() {
 
-  spiderSprite = new Sprite(resources["Bug.png"].texture);
-  spiderSprite.vel = {x: 0, y: 0};
+function setup() {
+  let playerSprite = new PIXI.Sprite(resources["Bug.png"].texture);
+  playerSprite.anchor.set(0.5, 0.5);
+  playerSprite.position.set(app.view.width / 2, app.view.height / 2);
+  playerSprite.scale.set(2);
+  playerSprite.rotation = Math.PI;
+  app.stage.addChild(playerSprite);
+
+  player = new Entity(playerSprite);
 
   // Input
   let left  = keyboard(/[aA]/, "ArrowLeft"),
@@ -49,11 +47,8 @@ function setup() {
     let modifier = (h != 0 && v != 0) ? //Moving in both axes
           speed / Math.sqrt(2) : //adjust for diagonal movement (currently only 8-directional movement)
           speed; //Otherwise speed value can be used directly
-    spiderSprite.vel.x = h * modifier;
-    spiderSprite.vel.y = v * modifier;
-    /*if(h != 0 || v != 0) { //If moving
-      spiderSprite.rotation = (Math.PI / 2) + Math.atan2(v, h);
-    }*/
+    player.vel.x = h * modifier;
+    player.vel.y = v * modifier;
   }
 
   [left, right, up, down].forEach((kb) => {
@@ -61,35 +56,10 @@ function setup() {
   });
 
   // Pointers normalize touch and mouse
-  interaction.on('pointerdown', () => {rotMod = 1/2;});
-  interaction.on('pointerup', () => {rotMod = 1;});
-
-  spiderSprite.anchor.set(0.5, 0.5);
-  spiderSprite.position.set(app.view.width / 2, app.view.height / 2);
-  spiderSprite.scale.set(2);
-  spiderSprite.rotation = spiderSprite.targetRotation = Math.PI;
-  app.stage.addChild(spiderSprite);
+  interaction.on('pointerdown', () => {player.rotationSpeed.addModifier({key: "combatMode", baseMult: 0.5})});
+  interaction.on('pointerup', () => {player.rotationSpeed.removeModifier("combatMode")});
 
   app.ticker.add(delta => gameLoop(delta));
-}
-
-function rotateToPoint(sprite, point) {
-  let x = point.x - sprite.x;
-  let y = point.y - sprite.y;
-  sprite.targetRotation = (Math.PI / 2) + Math.atan2(y, x)
-  //sprite.targetRotation = Math.atan2(Math.sin(x-y), Math.cos(x-y));
-}
-
-function updateRotation(sprite) {
-  let t = sprite.targetRotation;
-  let c = sprite.rotation
-  let delta = Math.atan2(Math.sin(t-c), Math.cos(t-c));
-  let r = rotSpeed * rotMod;
-  if(Math.abs(delta) < r) {
-    sprite.rotation = sprite.targetRotation;
-  } else {
-    sprite.rotation += Math.sign(delta) * r;
-  }
 }
 
 function gameLoop(delta) {
@@ -97,11 +67,9 @@ function gameLoop(delta) {
 }
 
 function play(delta) {
-  rotateToPoint(spiderSprite, interaction.mouse.global);
+  player.rotateToPoint(interaction.mouse.global);
 
-  spiderSprite.x += spiderSprite.vel.x;
-  spiderSprite.y += spiderSprite.vel.y;
-  updateRotation(spiderSprite);
+  player.update();
 }
 
 function escapeRegexChars(string) {
@@ -114,7 +82,7 @@ function keyboard(...labels) {
   if(!labels) {
     console.warn(`Tried to register a keybind with no keys defined`);
   }
-  let re = new RegExp("^(?:" + labels.map((l) => l instanceof RegExp ? l.source : l).join("|") + ")$");
+  let re = new RegExp("^(?:" + labels.map((l) => l instanceof RegExp ? l.source : escapeRegexChars(l)).join("|") + ")$");
   let key = {
     matcher: re,
     isDown: false,
@@ -139,28 +107,6 @@ function keyboard(...labels) {
       event.preventDefault();
     }
   };
-  /*key.code = keyCode;
-  key.isDown = false;
-  key.isUp = true;
-  key.press = undefined;
-  key.release = undefined;
-  //The `downHandler`
-  key.downHandler = event => {
-    if (event.keyCode === key.code) {
-      if (!key.isDown && key.press) key.press();
-      key.isDown = true;
-    }
-    event.preventDefault();
-  };
-
-  //The `upHandler`
-  key.upHandler = event => {
-    if (event.keyCode === key.code) {
-      if (key.isDown && key.release) key.release();
-      key.isDown = false;
-    }
-    event.preventDefault();
-  };*/
 
   //Attach event listeners
   window.addEventListener(
