@@ -4,7 +4,7 @@ class Entity {
     this.pos = {x: sprite.x, y: sprite.y};
     this.vel = {x: 0, y: 0};
     this.targetRotation = sprite.rotation
-    this.moveSpeed = moveSpeed;
+    this.moveSpeed = new Attribute(moveSpeed);
     this.rotationSpeed = new Attribute(Math.PI / (30 * rotationsPerSecond)); // 2* Math.PI / (fps * rps); fps = 60
   }
 

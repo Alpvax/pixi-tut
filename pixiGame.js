@@ -38,6 +38,7 @@ function setup() {
       down  = keyboard(/[sS]/, "ArrowDown");
 
   function updateVelocity() {
+    let speed = player.moveSpeed.value();
     let h = 0;
     let v = 0;
     if(left.isDown)   h -= 1;
@@ -56,8 +57,14 @@ function setup() {
   });
 
   // Pointers normalize touch and mouse
-  interaction.on('pointerdown', () => {player.rotationSpeed.addModifier({key: "combatMode", baseMult: 0.5})});
-  interaction.on('pointerup', () => {player.rotationSpeed.removeModifier("combatMode")});
+  interaction.on('pointerdown', () => {
+    player.rotationSpeed.addModifier({key: "combatMode", baseMult: 0.5});
+    player.moveSpeed.addModifier({key: "combatMode", baseMult: 0.3});
+  });
+  interaction.on('pointerup', () => {
+    player.rotationSpeed.removeModifier("combatMode");
+    player.moveSpeed.removeModifier("combatMode");
+  });
 
   app.ticker.add(delta => gameLoop(delta));
 }
