@@ -30,6 +30,7 @@ function setup() {
   app.stage.addChild(playerSprite);
 
   player = new Entity(playerSprite);
+  player.moveSpeed.onChange(updateVelocity);//Update velocity accepts no args, so att inst will be ignored
 
   // Input
   let left  = keyboard(/[aA]/, "ArrowLeft"),

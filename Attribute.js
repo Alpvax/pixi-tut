@@ -5,6 +5,24 @@ class Attribute {
     this.cachedVal;
     /**Whether or not the value needs to be re-calculated*/
     this.dirty = true;
+    this.listeners = [];
+  }
+
+  __markDirty() {
+    this.dirty = true;
+    this.listeners.forEach((l) => l(this.cachedVal));
+  }
+
+  /**
+   * @param {function} listener A function called whenever the value is changed. Will recieve the attribute instance as an argument.
+   * @returns the same `listener` passed in for convenience.
+   */
+  onChange(listener) {
+    this.listeners.push(listener);
+    return listener;
+  }
+  offChange(listener) {
+    this.listeners.filter((l) => l !== listener);
   }
 
   value() {
@@ -62,10 +80,14 @@ class Attribute {
       throw `Attempted to add modifier ${modifier} with the same key (${key}) as an existing modifier: ${this.modifiers.get(key)}.`;
     }
     this.modifiers.set(key, modifier);
-    this.dirty = true;
+    this.__markDirty();
   }
 
   removeModifier(key) {
-    return this.dirty = this.modifiers.delete(key);
+    let flag = this.modifiers.delete(key);
+    if(flag) {//If it was actually removed
+      this.__markDirty();
+    }
+    return flag;
   }
 }
