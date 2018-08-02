@@ -39,7 +39,7 @@ function setup() {
       down  = keyboard(/[sS]/, "ArrowDown");
 
   function updateVelocity() {
-    let speed = player.moveSpeed.value();
+    let speed = player.moveSpeed.value;
     let h = 0;
     let v = 0;
     if(left.isDown)   h -= 1;

@@ -15,6 +15,7 @@ class Attribute {
 
   /**
    * @param {function} listener A function called whenever the value is changed. Will recieve the attribute instance as an argument.
+   * The old value can be retrieved with `(att) => att.cachedVal` and the new value can be calculated and retrieved with `(att) => att.value`
    * @returns the same `listener` passed in for convenience.
    */
   onChange(listener) {
@@ -25,7 +26,11 @@ class Attribute {
     this.listeners.filter((l) => l !== listener);
   }
 
-  value() {
+  getValue() {
+    return this.value;
+  }
+
+  get value() {
     if(this.dirty) {
       let val = this.baseValue;
       let basemult = 1;

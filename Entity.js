@@ -24,7 +24,7 @@ class Entity {
     let t = this.targetRotation;
     let c = this.sprite.rotation
     let delta = Math.atan2(Math.sin(t-c), Math.cos(t-c));
-    let r = this.rotationSpeed.value();
+    let r = this.rotationSpeed.value;
     if(Math.abs(delta) < r) {
       this.sprite.rotation = t;
     } else {
