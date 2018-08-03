@@ -32,20 +32,20 @@ function setup() {
   player = new Entity(playerSprite);
   player.moveSpeed.onChange(updateVelocity);//Update velocity accepts no args, so att inst will be ignored
 
-  // Input
-  let left  = keyboard(/[aA]/, "ArrowLeft"),
-      right = keyboard(/[dD]/, "ArrowRight"),
-      up    = keyboard(/[wW]/, "ArrowUp"),
-      down  = keyboard(/[sS]/, "ArrowDown");
+  let actionWest  = new InputAction("player.move.west" , true, {onChange: updateVelocity});
+  let actionEast  = new InputAction("player.move.east" , true, {onChange: updateVelocity});
+  let actionNorth = new InputAction("player.move.north", true, {onChange: updateVelocity});
+  let actionSouth = new InputAction("player.move.south", true, {onChange: updateVelocity});
 
   function updateVelocity() {
+    console.log("Updating vel!");
     let speed = player.moveSpeed.value;
     let h = 0;
     let v = 0;
-    if(left.isDown)   h -= 1;
-    if(right.isDown)  h += 1;
-    if(up.isDown)     v -= 1;
-    if(down.isDown)   v += 1;
+    if(actionWest.active)   h -= 1;
+    if(actionEast.active)   h += 1;
+    if(actionNorth.active)  v -= 1;
+    if(actionSouth.active)  v += 1;
     let modifier = (h != 0 && v != 0) ? //Moving in both axes
           speed / Math.sqrt(2) : //adjust for diagonal movement (currently only 8-directional movement)
           speed; //Otherwise speed value can be used directly
@@ -53,9 +53,10 @@ function setup() {
     player.vel.y = v * modifier;
   }
 
-  [left, right, up, down].forEach((kb) => {
-    kb.press = kb.release = updateVelocity;
-  });
+  let left  = new Keybind(actionWest , "A", {toggle:true}, "KeyA");
+  let right = new Keybind(actionEast , "D", {toggle:true, onup: true}, "KeyD");
+  let up    = new Keybind(actionNorth, "W", {}, "KeyW");
+  let down  = new Keybind(actionSouth, "S", {}, "KeyS");
 
   // Pointers normalize touch and mouse
   interaction.on('pointerdown', () => {
@@ -80,13 +81,7 @@ function play(delta) {
   player.update();
 }
 
-function escapeRegexChars(string) {
-  let specialChars = [ "$", "^", "*", "(", ")", "+", "[", "]", "{", "}", "\\", "|", ".", "?", "/" ];
-  let regex = new RegExp("(\\" + specialChars.join("|\\") + ")", "g");
-  return string.replace(regex, "\\$1");
-}
-
-function keyboard(...labels) {
+/*function keyboard(...labels) {
   if(!labels) {
     console.warn(`Tried to register a keybind with no keys defined`);
   }
@@ -124,4 +119,4 @@ function keyboard(...labels) {
     "keyup", key.upHandler.bind(key), false
   );
   return key;
-}
+}*/
