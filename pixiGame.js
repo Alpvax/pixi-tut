@@ -2,6 +2,8 @@
 const loader = PIXI.loader,
     resources = PIXI.loader.resources;
 
+document.addEventListener('contextmenu', event => event.preventDefault());
+
 let app = new PIXI.Application({width: 400, height: 400});
 document.body.appendChild(app.view);
 let interaction = app.renderer.plugins.interaction;
@@ -76,11 +78,11 @@ function setup() {
   let down  = new Keybind(actionSouth, "S", {}, "KeyS");
 
   // Pointers normalize touch and mouse
-  interaction.on('pointerdown', () => {
+  interaction.on('pointerdown', (e) => {
     player.rotationSpeed.addModifier({key: "combatMode", baseMult: 0.5});
     player.moveSpeed.addModifier({key: "combatMode", baseMult: 0.3});
   });
-  interaction.on('pointerup', () => {
+  interaction.on('pointerup', (e) => {
     player.rotationSpeed.removeModifier("combatMode");
     player.moveSpeed.removeModifier("combatMode");
   });
