@@ -22,25 +22,28 @@ loader.add("Bug.png")
   .load(setup);
 
 function setup() {
-  let playerSprite = new PIXI.Graphics();
-  playerSprite.beginFill(0x6330ff);
-  playerSprite.drawEllipse(0, 0, 40, 15);
-  playerSprite.endFill();
-  playerSprite.beginFill(0xffe0bd);
-  playerSprite.drawCircle(0, 0, 20);
-  playerSprite.drawPolygon([
-    -15, 15,
-    0, -28,
-    15, 15
-  ]);
-  playerSprite.endFill();
-  playerSprite.pivot.set(0, 0);
-  playerSprite.position.set(app.view.width / 2, app.view.height / 2);
-  playerSprite.scale.set(1.2);
-  playerSprite.rotation = Math.PI;
-  app.stage.addChild(playerSprite);
+  function createPlayerSprite() {
+    let playerSprite = new PIXI.Graphics();
+    playerSprite.beginFill(0x6330ff);
+    playerSprite.drawEllipse(0, 0, 40, 15);
+    playerSprite.endFill();
+    playerSprite.beginFill(0xffe0bd);
+    playerSprite.drawCircle(0, 0, 20);
+    playerSprite.drawPolygon([
+      -15, 15,
+      0, -28,
+      15, 15
+    ]);
+    playerSprite.endFill();
+    playerSprite.pivot.set(0, 0);
+    playerSprite.position.set(app.view.width / 2, app.view.height / 2);
+    playerSprite.scale.set(1.2);
+    playerSprite.rotation = Math.PI;
+    app.stage.addChild(playerSprite);
+    return playerSprite;
+  }
 
-  player = new Entity(playerSprite);
+  player = new Entity(createPlayerSprite());
   player.moveSpeed.onChange(updateVelocity);//Update velocity accepts no args, so att inst will be ignored
 
   let actionWest  = new InputAction("player.move.west" , true, {onChange: updateVelocity});
