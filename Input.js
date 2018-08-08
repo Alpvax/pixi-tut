@@ -11,7 +11,7 @@ class InputAction {
     Input.set(id, this);
   }
   toggle() {
-    console.log("Toggling!");
+    //console.log("Toggling!");
     this.__toggleState = !this.__toggleState;
     this.callbacks.onChange(this);
   }
@@ -70,7 +70,7 @@ class Keybind {
   handle(event, down) {
     if(this.match(event)) {
       if(down !== this.isDown) {//Prevent repeat events
-        console.log(`Press: ${down}; TriggerOnDown: ${!this.onup}; ShouldTrigger: ${down !== this.onup};`);//XXX
+        //console.log(`Press: ${down}; TriggerOnDown: ${!this.onup}; ShouldTrigger: ${down !== this.onup};`);//XXX
         this.isDown = down;
         this.action.updateActiveState(this);
         if(down !== this.onup) {
@@ -103,37 +103,8 @@ function defineKeybind(path, defaultKey) {
   Keybinds.set(new Keybind(defaultKey))
 }
 
-Object.entries(jsonKeybindings).forEach((key, input) => {
-  /*let key = {
-    matcher: re,
-    isDown: false,
-    press: undefined,
-    release: undefined,
-    downHandler: (event) => {
-      if(key.matcher.test(event.key) && !key.isDown) {
-        key.isDown = true;
-        if(key.press) {
-          key.press(event.key);
-        }
-      }
-      event.preventDefault();
-    },
-    upHandler: (event) => {
-      if(key.matcher.test(event.key) && key.isDown) {
-        key.isDown = false;
-        if(key.release) {
-          key.release(event.key);
-        }
-      }
-      event.preventDefault();
-    }
-  };
-  window.addEventListener(
-    "keydown", key.downHandler.bind(key), false
-  );
-  window.addEventListener(
-    "keyup", key.upHandler.bind(key), false
-  );*/
+Object.entries(defaultKeybindings).forEach((key, input) => {
+  //TODO: Load
 });
 
 
