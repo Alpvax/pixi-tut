@@ -16,6 +16,8 @@ app.renderer.resize(window.innerWidth, window.innerHeight);
 
 let player;
 let state = play;
+let spiders = [];
+let spawner;
 
 loader.add("Bug.png")
   .on("progress", (loader, resource) => {
@@ -47,6 +49,10 @@ function setup() {
 
   player = new Entity(createPlayerSprite());
   player.moveSpeed.onChange(updateVelocity);//Update velocity accepts no args, so att inst will be ignored
+
+  spawner = new SpiderSpawner();
+  spawner.pos = {x: 100, y: 100};
+  app.stage.addChild(spawner.sprite);
 
   let actionWest  = new InputAction("player.move.west" , true, {onChange: updateVelocity});
   let actionEast  = new InputAction("player.move.east" , true, {onChange: updateVelocity});
@@ -96,8 +102,22 @@ function gameLoop(delta) {
 
 function play(delta) {
   player.rotateToPoint(interaction.mouse.global);
-
   player.update();
+  spawner.rotateToPoint(player.pos);
+  spawner.update();
+  spiders.forEach((spider) => {
+    //if(!app.stage.children.contains(spider.sprite)) {
+      app.stage.addChild(spider.sprite);
+    //}
+    spider.rotateToPoint(player.pos);
+    let x = player.pos.x - spider.pos.x;
+    let y = player.pos.y - spider.pos.y;
+    let a = Math.atan2(y, x);
+    let speed = spider.moveSpeed.value;
+    spider.vel.x = Math.cos(a) * speed;
+    spider.vel.y = Math.sin(a) * speed;
+    spider.update();
+  });
 }
 
 /*function keyboard(...labels) {
