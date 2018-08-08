@@ -1,11 +1,37 @@
-var jsonKeybindings = {
-  "a": "player.move.west",
-  "ArrowLeft": "player.move.left",
-  "d": "player.move.east",
-  "ArrowRight": "player.move.right",
-  "w": "player.move.north",
-  "ArrowUp": "player.move.forward",
-  "s": "player.move.south",
-  "ArrowDown": "player.move.back"
-  //Mouse bindings?
+var defaultKeybindings = {
+  "default": [
+    {
+      "key": "A",
+      "action": "player.move.west"
+    },
+    {
+      "key": "D",
+      "action": "player.move.east"
+    },
+    {
+      "key": "W",
+      "action": "player.move.north"
+    },
+    {
+      "key": "S",
+      "action": "player.move.south"
+    },
+    {
+      "key": "ArrowLeft",
+      "action": "player.move.left"
+    },
+    {
+      "key": "ArrowRight",
+      "action": "player.move.right"
+    },
+    {
+      "key": "ArrowUp",
+      "action": "player.move.forward"
+    },
+    {
+      "key": "ArrowDown",
+      "action": "player.move.back"
+    }
+  ]
+  //TODO: Mouse bindings?
 }
