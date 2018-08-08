@@ -22,10 +22,21 @@ loader.add("Bug.png")
   .load(setup);
 
 function setup() {
-  let playerSprite = new PIXI.Sprite(resources["Bug.png"].texture);
-  playerSprite.anchor.set(0.5, 0.5);
+  let playerSprite = new PIXI.Graphics();
+  playerSprite.beginFill(0x6330ff);
+  playerSprite.drawEllipse(0, 0, 40, 15);
+  playerSprite.endFill();
+  playerSprite.beginFill(0xffe0bd);
+  playerSprite.drawCircle(0, 0, 20);
+  playerSprite.drawPolygon([
+    -15, 15,
+    0, -28,
+    15, 15
+  ]);
+  playerSprite.endFill();
+  playerSprite.pivot.set(0, 0);
   playerSprite.position.set(app.view.width / 2, app.view.height / 2);
-  playerSprite.scale.set(2);
+  playerSprite.scale.set(1.2);
   playerSprite.rotation = Math.PI;
   app.stage.addChild(playerSprite);
 
@@ -38,7 +49,6 @@ function setup() {
   let actionSouth = new InputAction("player.move.south", true, {onChange: updateVelocity});
 
   function updateVelocity() {
-    console.log("Updating vel!");
     let speed = player.moveSpeed.value;
     let h = 0;
     let v = 0;
@@ -53,8 +63,12 @@ function setup() {
     player.vel.y = v * modifier;
   }
 
+  /* Test toggling:
   let left  = new Keybind(actionWest , "A", {toggle:true}, "KeyA");
   let right = new Keybind(actionEast , "D", {toggle:true, onup: true}, "KeyD");
+  */
+  let left  = new Keybind(actionWest , "A", {}, "KeyA");
+  let right = new Keybind(actionEast , "D", {}, "KeyD");
   let up    = new Keybind(actionNorth, "W", {}, "KeyW");
   let down  = new Keybind(actionSouth, "S", {}, "KeyS");
 
