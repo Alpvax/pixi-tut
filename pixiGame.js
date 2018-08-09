@@ -84,11 +84,11 @@ function setup() {
   let down  = new Keybind(actionSouth, "S", {}, "KeyS");
 
   // Pointers normalize touch and mouse
-  interaction.on('pointerdown', (e) => {
+  interaction.on("pointerdown", (e) => {
     player.rotationSpeed.addModifier({key: "combatMode", baseMult: 0.5});
     player.moveSpeed.addModifier({key: "combatMode", baseMult: 0.3});
   });
-  interaction.on('pointerup', (e) => {
+  interaction.on("pointerup", (e) => {
     player.rotationSpeed.removeModifier("combatMode");
     player.moveSpeed.removeModifier("combatMode");
   });
@@ -101,7 +101,7 @@ function gameLoop(delta) {
 }
 
 function play(delta) {
-  player.rotateToPoint(interaction.mouse.global);
+  player.rotateToPoint(Vector.add(interaction.mouse.global, app.stage.position));
   player.update();
   app.stage.position.set(app.view.width / 2 - player.pos.x, app.view.height / 2 - player.pos.y);
   spawner.rotateToPoint(player.pos);
