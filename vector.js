@@ -69,7 +69,11 @@ class Vector {
 Vector.add = (...vec) => Vector.prototype.add.call(...vec);
 Vector.subtract = (vec, ...sub) => Vector.prototype.subtract.call(vec, ...sub);
 Vector.invert = (vec) => Vector.prototype.invert.call(vec);
-Vector.scale = (vec, mult) => Vector.prototype.scale.call(vec);
+Vector.scale = (vec, mult) => Vector.prototype.scale.call(vec, mult);
 Vector.dot = (...vec) => Vector.prototype.dot.call(...vec);
-Vector.magnitude = (vec) => new Vector(vec).magnitude;
-Vector.angle = (vec) => new Vector(vec).angle;
+Vector.magnitude = function(vec) {
+  return new Vector(...arguments).magnitude;
+};
+Vector.angle = function(vec) {
+  return new Vector(...arguments).angle;
+};
