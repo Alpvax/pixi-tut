@@ -1,17 +1,41 @@
 class Entity {
-  constructor(sprite, moveSpeed = 5, rotationsPerSecond = 1) {
-    this.sprite = sprite;
-    this.pos = {x: sprite.x, y: sprite.y};
+  constructor(entityFactory, displayObj, moveSpeed = 5, rotationsPerSecond = 1) {
+    Object.defineProperties(this, {
+      factory: {
+        value: entityFactory.key,
+        configurable: false,
+        enumerable: true,
+        writable: false
+      },
+      entityFactoryObj: {
+        get: () => entityFactory,
+        configurable: false,
+        enumerable: true,
+        writable: false
+      }
+    });
+    this.displayObj = displayObj;
+    this.pos = {x: displayObj.x, y: displayObj.y};
     this.vel = {x: 0, y: 0};
-    this.targetRotation = sprite.rotation
+    this.targetRotation = displayObj.rotation
     this.moveSpeed = new Attribute(moveSpeed);
     this.rotationSpeed = new Attribute(Math.PI / (30 * rotationsPerSecond)); // 2* Math.PI / (fps * rps); fps = 60
+    this.dead = false;
   }
 
   update() {
-    this.sprite.x = this.pos.x += this.vel.x;
-    this.sprite.y = this.pos.y += this.vel.y;
-    this.updateRotation();
+    if(!this.dead) {
+      this.displayObj.x = this.pos.x += this.vel.x;
+      this.displayObj.y = this.pos.y += this.vel.y;
+      this.updateRotation();
+    } else {
+      //this.displayObj.
+    }
+  }
+
+  kill() {
+    this.dead = true;
+    this.entityFactoryObj.dead.push(this.displayObj);
   }
 
   rotateToPoint(point) {
@@ -22,13 +46,73 @@ class Entity {
 
   updateRotation() {
     let t = this.targetRotation;
-    let c = this.sprite.rotation
+    let c = this.displayObj.rotation
     let delta = Math.atan2(Math.sin(t-c), Math.cos(t-c));
     let r = this.rotationSpeed.value;
     if(Math.abs(delta) < r) {
-      this.sprite.rotation = t;
+      this.displayObj.rotation = t;
     } else {
-      this.sprite.rotation += Math.sign(delta) * r;
+      this.displayObj.rotation += Math.sign(delta) * r;
     }
   }
 }
+
+class EntityFactory {
+  constructor(key, createDO, createEntity, limit) {
+    Object.defineProperty(this, "key", {
+      value: key,
+      configurable: false,
+      enumerable: true,
+      writable: false
+    });
+    this.limit = isNaN(limit) ? -1 : limit;//-1 = Unlimited
+    this.dead = [];
+    this.createNewDO = EntityFactory.__makeCreateFunc(createDO || key);
+    this.createNewEntity = createEntity;
+  }
+  createDisplayObject() {
+    if(this.limit < 0 || this.count < this.limit) {
+      if(this.dead.length > 0) {
+        return this.dead.unshift(); //FIFO order
+      } else {
+        return this.createNewDO(...arguments); //Pass arguments just in case they are used in future
+      }
+    }
+    return false;
+  }
+  create(...entityArgs) {
+    let display = this.createDisplayObject();
+    if(display) {
+      if(this.createNewEntity) {
+        return this.createNewEntity(this, display, ...entityArgs);
+      } else {
+        return new Entity(this, display, ...entityArgs);
+      }
+    }
+    return false;
+  }
+}
+EntityFactory.__makeCreateFunc = function(create) {
+  switch(typeof create) {
+  case "function":
+    return create;
+  case "string":
+    create = PIXI.loader.resources[create].texture;
+  case "object":
+    if(create instanceof PIXI.Sprite) {
+      create = create.texture;
+    }
+    if(create instanceof PIXI.Texture) {
+      return function() {
+        return new PIXI.Sprite(create);
+      }
+    }
+    if(create instanceof PIXI.Graphics) {
+      return function() {
+        return create.clone();
+      }
+    }
+  }
+  throw new Error("Unknown how to create a new PIXI.DisplayObject from: " + create);
+}
+Entity.deadDOs = new Map();

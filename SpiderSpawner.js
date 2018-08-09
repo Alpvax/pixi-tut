@@ -11,6 +11,10 @@ class SpiderSpawner extends Entity {
     spider.sprite.scale.set(2);
     spider.sprite.anchor.set(0.5, 0.5);
     spider.sprite.rotation = Math.random() * 2 * Math.PI;
+    spider.sprite.interactive = true;
+    spider.sprite.on("pointertap", (e) => {
+      spiders = spiders.filter((s) => s !== spider);
+    });
     spider.moveSpeed.addModifier({key: "randomSpeed", baseMult: Math.random() + Math.random()});//Add a random speed modifier, up to 2x
     spider.pos.x = this.pos.x;
     spider.pos.y = this.pos.y;
