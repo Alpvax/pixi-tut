@@ -101,7 +101,7 @@ function gameLoop(delta) {
 }
 
 function play(delta) {
-  player.rotateToPoint(Vector.add(interaction.mouse.global, app.stage.position));
+  player.rotateToPoint(Vector.add(interaction.mouse.global, player.pos, {x: -app.view.width / 2, y: -app.view.height / 2}));
   player.update();
   app.stage.position.set(app.view.width / 2 - player.pos.x, app.view.height / 2 - player.pos.y);
   spawner.rotateToPoint(player.pos);

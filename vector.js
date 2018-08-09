@@ -48,7 +48,7 @@ class Vector {
     return new Vector(x, y);
   }
   subtract(...vec) {
-    return Vector.add(this, vec.map((v) => Vector.invert(v)));//Allow calling via Vector.subtract()
+    return Vector.add(this, ...vec.map((v) => Vector.invert(v)));//Allow calling via Vector.subtract()
   }
   invert() {
     return new Vector(-this.x, -this.y);
@@ -67,7 +67,7 @@ class Vector {
   }
 }
 Vector.add = (...vec) => Vector.prototype.add.call(...vec);
-Vector.subtract = (...vec) => Vector.prototype.subtract.call(...vec);
+Vector.subtract = (vec, ...sub) => Vector.prototype.subtract.call(vec, ...sub);
 Vector.invert = (vec) => Vector.prototype.invert.call(vec);
 Vector.scale = (vec, mult) => Vector.prototype.scale.call(vec);
 Vector.dot = (...vec) => Vector.prototype.dot.call(...vec);
