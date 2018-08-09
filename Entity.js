@@ -59,6 +59,9 @@ class Entity {
 
 class EntityFactory {
   constructor(key, createDO, createEntity, limit) {
+    if(Entity.Factories.has(key)) {
+      throw new Error("Factory already registered with key: " + key);
+    }
     Object.defineProperty(this, "key", {
       value: key,
       configurable: false,
@@ -69,6 +72,7 @@ class EntityFactory {
     this.dead = [];
     this.createNewDO = EntityFactory.__makeCreateFunc(createDO || key);
     this.createNewEntity = createEntity;
+    Entity.Factories.set(key, this);
   }
   createDisplayObject() {
     if(this.limit < 0 || this.count < this.limit) {
@@ -115,4 +119,4 @@ EntityFactory.__makeCreateFunc = function(create) {
   }
   throw new Error("Unknown how to create a new PIXI.DisplayObject from: " + create);
 }
-Entity.deadDOs = new Map();
+Entity.Factories = new Map();
