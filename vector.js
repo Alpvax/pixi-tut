@@ -11,6 +11,9 @@ class Vector {
       x = point.x;
       y = point.y;
     }
+    if(isNaN(x) || isNaN(y)) {
+      throw new Error(`Both x: (${x}) and y: (${y}) must be numeric in a vector`);
+    }
     Object.defineProperties(this, {
       "x": {
         value: x,
@@ -48,7 +51,7 @@ class Vector {
     return new Vector(x, y);
   }
   subtract(...vec) {
-    return Vector.add(this, ...vec.map((v) => Vector.invert(v)));//Allow calling via Vector.subtract()
+    return Vector.add(this, ...vec.map(Vector.invert));//Allow calling via Vector.subtract()
   }
   invert() {
     return new Vector(-this.x, -this.y);
