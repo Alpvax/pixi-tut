@@ -103,6 +103,7 @@ function gameLoop(delta) {
 function play(delta) {
   player.rotateToPoint(interaction.mouse.global);
   player.update();
+  app.stage.position.set(app.view.width / 2 - player.pos.x, app.view.height / 2 - player.pos.y);
   spawner.rotateToPoint(player.pos);
   spawner.update();
   spiders.forEach((spider) => {
