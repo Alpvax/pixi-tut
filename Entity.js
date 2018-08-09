@@ -34,7 +34,7 @@ class Entity {
 
   kill() {
     this.dead = true;
-    this.entityFactoryObj.dead.push(this.displayObj);
+    this.entityFactoryObj.die(this);
   }
 
   rotateToPoint(point) {
@@ -68,6 +68,7 @@ class EntityFactory {
       writable: false
     });
     this.limit = isNaN(limit) ? -1 : limit;//-1 = Unlimited
+    this.count = 0;
     this.dead = [];
     this.createNewDO = EntityFactory.__makeCreateFunc(createDO || key);
     this.createNewEntity = createEntity;
@@ -76,7 +77,7 @@ class EntityFactory {
   createDisplayObject() {
     if(this.canSpawn) {
       if(this.dead.length > 0) {
-        return this.dead.unshift(); //FIFO order
+        return this.dead.shift(); //FIFO order
       } else {
         return this.createNewDO(...arguments); //Pass arguments just in case they are used in future
       }
@@ -85,14 +86,23 @@ class EntityFactory {
   }
   create(...entityArgs) {
     let display = this.createDisplayObject();
+    let entity;
     if(display) {
       if(this.createNewEntity) {
-        return this.createNewEntity(this, display, ...entityArgs);
+        entity = this.createNewEntity(this, display, ...entityArgs);
       } else {
-        return new Entity(this, display, ...entityArgs);
+        entity = new Entity(this, display, ...entityArgs);
       }
     }
+    if(entity) {
+      this.count++;
+      return entity
+    }
     return false;
+  }
+  die(entity) {
+    this.count--;
+    this.dead.push(entity.displayObj);
   }
   get canSpawn() {
     return this.limit < 0 || this.count < this.limit;

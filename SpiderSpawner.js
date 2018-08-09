@@ -10,15 +10,17 @@ let spiderFactory = new EntityFactory("spider", () => {
     sprite.anchor.set(0.5, 0.5);
     sprite.rotation = Math.random() * 2 * Math.PI;
     sprite.interactive = true;
-    sprite.on("pointertap", (e) => {
-      spiders = spiders.filter((s) => s !== spider);
-    });
     return sprite;
-  }, (factory, sprite, ...args) => {
+  }, (factory, sprite, spawner, ...args) => {
     let spider = new Entity(factory, sprite, ...args);
     spider.moveSpeed.addModifier({key: "randomSpeed", baseMult: Math.random() + Math.random()});//Add a random speed modifier, up to 2x
-    spider.pos.x = this.pos.x;
-    spider.pos.y = this.pos.y;
+    spider.pos.x = spawner.pos.x;
+    spider.pos.y = spawner.pos.y;
+    sprite.on("pointertap", (e) => {
+      spider.kill();
+      spiders = spiders.filter((s) => s !== this, spider);
+      console.log(spiders);//XXX
+    });
     return spider;
   }, 3);
 
@@ -47,7 +49,7 @@ class SpiderSpawner extends Entity {
     super.update();
     if(spiderFactory.canSpawn && Math.random() * 200 < 1) {
       //spiders.push(this.spawnSpider());
-      spiders.push(spiderFactory.create(4, 0.8));
+      spiders.push(spiderFactory.create(this, 4, 0.8));
     }
   }
 }

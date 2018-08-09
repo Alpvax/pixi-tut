@@ -109,7 +109,7 @@ function play(delta) {
   spawner.update();
   spiders.forEach((spider) => {
     //if(!app.stage.children.contains(spider.sprite)) {
-      app.stage.addChild(spider.sprite);
+      app.stage.addChild(spider.displayObj);
     //}
     spider.rotateToPoint(player.pos);
     let x = player.pos.x - spider.pos.x;
