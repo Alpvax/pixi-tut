@@ -1,8 +1,30 @@
+new EntityFactory("spiderSpawner", () => {
+  let sprite = new PIXI.Sprite(resources["Bug.png"].texture);
+  sprite.scale.set(4);
+  sprite.anchor.set(0.5, 0.5);
+  return sprite;
+}, (f,d) => new SpiderSpawner(f,d));
+let spiderFactory = new EntityFactory("spider", () => {
+    let sprite = new PIXI.Sprite(resources["Bug.png"].texture);
+    sprite.scale.set(2);
+    sprite.anchor.set(0.5, 0.5);
+    sprite.rotation = Math.random() * 2 * Math.PI;
+    sprite.interactive = true;
+    sprite.on("pointertap", (e) => {
+      spiders = spiders.filter((s) => s !== spider);
+    });
+    return sprite;
+  }, (factory, sprite, ...args) => {
+    let spider = new Entity(factory, sprite, ...args);
+    spider.moveSpeed.addModifier({key: "randomSpeed", baseMult: Math.random() + Math.random()});//Add a random speed modifier, up to 2x
+    spider.pos.x = this.pos.x;
+    spider.pos.y = this.pos.y;
+    return spider;
+  }, 3);
+
 class SpiderSpawner extends Entity {
-  constructor(rotationsPerSecond = 0.1) {
-    super(new PIXI.Sprite(resources["Bug.png"].texture));
-    this.sprite.scale.set(4);
-    this.sprite.anchor.set(0.5, 0.5);
+  constructor(f, d, rotationsPerSecond = 0.1) {
+    super(f, d, new PIXI.Sprite(resources["Bug.png"].texture), rotationsPerSecond);
   }
 
   spawnSpider() {
@@ -23,8 +45,9 @@ class SpiderSpawner extends Entity {
 
   update() {
     super.update();
-    if(spiders.length < 3 && Math.random() * 200 < 1) {
-      spiders.push(this.spawnSpider());
+    if(spiderFactory.canSpawn && Math.random() * 200 < 1) {
+      //spiders.push(this.spawnSpider());
+      spiders.push(spiderFactory.create(4, 0.8));
     }
   }
 }

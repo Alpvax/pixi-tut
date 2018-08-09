@@ -26,7 +26,7 @@ loader.add("Bug.png")
   .load(setup);
 
 function setup() {
-  function createPlayerSprite() {
+  let playerFactory = new EntityFactory("player", function() {
     let playerSprite = new PIXI.Graphics();
     playerSprite.beginFill(0x6330ff);
     playerSprite.drawEllipse(0, 0, 40, 15);
@@ -43,16 +43,17 @@ function setup() {
     playerSprite.position.set(app.view.width / 2, app.view.height / 2);
     playerSprite.scale.set(1.2);
     playerSprite.rotation = Math.PI;
-    app.stage.addChild(playerSprite);
     return playerSprite;
-  }
+  });
 
-  player = new Entity(createPlayerSprite());
+
+  player = playerFactory.create();
+  app.stage.addChild(player.displayObj);
   player.moveSpeed.onChange(updateVelocity);//Update velocity accepts no args, so att inst will be ignored
 
-  spawner = new SpiderSpawner();
+  spawner = Entity.Factories.get("spiderSpawner").create();
   spawner.pos = {x: 100, y: 100};
-  app.stage.addChild(spawner.sprite);
+  app.stage.addChild(spawner.displayObj);
 
   let actionWest  = new InputAction("player.move.west" , true, {onChange: updateVelocity});
   let actionEast  = new InputAction("player.move.east" , true, {onChange: updateVelocity});

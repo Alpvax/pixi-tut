@@ -10,8 +10,7 @@ class Entity {
       entityFactoryObj: {
         get: () => entityFactory,
         configurable: false,
-        enumerable: true,
-        writable: false
+        enumerable: true
       }
     });
     this.displayObj = displayObj;
@@ -75,7 +74,7 @@ class EntityFactory {
     Entity.Factories.set(key, this);
   }
   createDisplayObject() {
-    if(this.limit < 0 || this.count < this.limit) {
+    if(this.canSpawn) {
       if(this.dead.length > 0) {
         return this.dead.unshift(); //FIFO order
       } else {
@@ -94,6 +93,9 @@ class EntityFactory {
       }
     }
     return false;
+  }
+  get canSpawn() {
+    return this.limit < 0 || this.count < this.limit;
   }
 }
 EntityFactory.__makeCreateFunc = function(create) {
