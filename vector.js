@@ -68,6 +68,9 @@ class Vector {
     });
     return new Vector(x, y);
   }
+  unit() {
+    return this.scale(1 / this.magnitude);
+  }
 }
 Vector.add = (...vec) => Vector.prototype.add.call(...vec);
 Vector.subtract = (vec, ...sub) => Vector.prototype.subtract.call(vec, ...sub);
@@ -80,3 +83,6 @@ Vector.magnitude = function(vec) {
 Vector.angle = function(vec) {
   return new Vector(...arguments).angle;
 };
+Vector.unit = function(vec) {
+  return new Vector(...arguments).unit;
+}
