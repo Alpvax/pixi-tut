@@ -1,3 +1,5 @@
+"use strict"
+
 class Vector {
   /**
    * @param {object|number} point Either the x co-ord, or an object with properties x and y
@@ -75,7 +77,7 @@ class Vector {
             return cachedAng;
           },
           set(a) {
-            this.rotate(t - this.angle);
+            this.rotate(a - this.angle);
           }
         }
       };
@@ -83,7 +85,11 @@ class Vector {
     Object.keys(baseDescript).forEach((k) => {
       Object.defineProperty(this, k, Object.assign({}, baseDescript[k], propDescript[k]));
     });
-    console.log(this)
+    Object.defineProperty(this, "immutable", {
+      value: !!immutable,
+      configurable: false,
+      enumerable: false
+    });
   }
   __getUpdated(x, y) {
     if(this.immutable) {
@@ -128,9 +134,24 @@ class Vector {
     return this.scale(1 / this.magnitude);
   }
   rotate(angle) {
-    //TODO:rotate
+    let mag = this.magnitude;
+    let ang = this.angle;
+    let x = Math.cos(ang + angle);
+    let y = Math.sin(ang + angle);
+    return this.__getUpdated(x, y);
   }
 }
+Vector.Mutable = class extends Vector {
+  constructor(point, y) {
+    super(point, y, false);
+  }
+}
+Vector.Immutable = class extends Vector {
+  constructor(point, y) {
+    super(point, y, true);
+  }
+}
+
 Vector.add = (...vec) => Vector.prototype.add.call(...vec);
 Vector.subtract = (vec, ...sub) => Vector.prototype.subtract.call(vec, ...sub);
 Vector.invert = (vec) => Vector.prototype.invert.call(vec);
@@ -145,3 +166,4 @@ Vector.angle = function(vec) {
 Vector.unit = function(vec) {
   return new Vector(...arguments).unit;
 }
+Vector.rotate = (vec, angle) => new Vector(vec).rotate(angle);
