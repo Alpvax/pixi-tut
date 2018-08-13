@@ -5,7 +5,7 @@ class Vector {
    * @param {number} point.y The y co-ord of the point
    * @param {number} [y] The y co-ord of the point
    */
-  constructor(point, y) {
+  constructor(point, y, immutable=false) {
     let x = point;
     if(typeof point === "object") {
       x = point.x;
@@ -14,32 +14,88 @@ class Vector {
     if(isNaN(x) || isNaN(y)) {
       throw new Error(`Both x: (${x}) and y: (${y}) must be numeric in a vector`);
     }
-    Object.defineProperties(this, {
-      "x": {
-        value: x,
+    let baseDescript = ["x", "y", "magnitude", "angle"].reduce((obj, key) => {
+      obj[key] = Object.assign({
         configurable: false,
-        enumerable: true,
-        writable: false
-      },
-      "y": {
-        value: y,
-        configurable: false,
-        enumerable: true,
-        writable: false
-      },
-      "magnitude": {
-        value: Math.sqrt(x*x + y*y),
-        configurable: false,
-        enumerable: true,
-        writable: false
-      },
-      "angle": {
-        value: Math.atan2(y, x),
-        configurable: false,
-        enumerable: true,
-        writable: false
-      }
-    });//Define immutable properties
+        enumerable: true
+      }, immutable ? {writable: false} : {});
+      return obj;
+    }, {});
+    let propDescript;
+    if(immutable) {//Define immutable properties
+      propDescript = {
+        x: {value: x},
+        y: {value: y},
+        magnitude: {value: Math.sqrt(x*x + y*y)},
+        angle: {value: Math.atan2(y, x)},
+      };
+    } else {
+      //Mutable vars
+      let dirtyMag = true;
+      let dirtyAng = true;
+      let cachedMag;
+      let cachedAng;
+      propDescript = {
+        x: {
+          get() {
+            return x;
+          },
+          set(val) {
+            x = val;
+            dirtyMag = dirtyAng = true;
+          }
+        },
+        y: {
+          get() {
+            return y;
+          },
+          set(val) {
+            y = val;
+            dirtyMag = dirtyAng = true;
+          }
+        },
+        magnitude: {
+          get() {
+            if(dirtyMag) {
+              cachedMag = Math.sqrt(x*x + y*y);
+              dirtyMag = false;
+            }
+            return cachedMag;
+          },
+          set(val) {
+            this.scale(val / this.magnitude);
+          }
+        },
+        angle: {
+          get() {
+            if(dirtyAng) {
+              cachedAng = Math.atan2(y, x);
+              dirtyAng = false;
+            }
+            return cachedAng;
+          },
+          set(a) {
+            this.rotate(t - this.angle);
+          }
+        }
+      };
+    }
+    Object.keys(baseDescript).forEach((k) => {
+      Object.defineProperty(this, k, Object.assign({}, baseDescript[k], propDescript[k]));
+    });
+    console.log(this)
+  }
+  __getUpdated(x, y) {
+    if(this.immutable) {
+      return new Vector(x, y);
+    } else {
+      this.x = x;
+      this.y = y;
+      return this;
+    }
+  }
+  toString(listMagAng) {
+    return `Vector{x: ${this.x}, y: ${this.y + (listMagAng ? `, magnitude: ${this.magnitude}, angle: ${this.angle}` : "")}}`;
   }
   add(...vec) {
     let x = this.x || 0;//Allow calling via Vector.add()
@@ -48,13 +104,13 @@ class Vector {
       x += v.x;
       y += v.y;
     });
-    return new Vector(x, y);
+    return this.__getUpdated(x, y);
   }
   subtract(...vec) {
     return Vector.add(this, ...vec.map(Vector.invert));//Allow calling via Vector.subtract()
   }
   invert() {
-    return new Vector(-this.x, -this.y);
+    return this.__getUpdated(-this.x, -this.y);
   }
   scale(mult) {
     return Vector.dot(this, {x: mult, y: mult});//Allow calling via Vector.scale()
@@ -66,10 +122,13 @@ class Vector {
       x *= v.x;
       y *= v.y;
     });
-    return new Vector(x, y);
+    return this.__getUpdated(x, y);
   }
   unit() {
     return this.scale(1 / this.magnitude);
+  }
+  rotate(angle) {
+    //TODO:rotate
   }
 }
 Vector.add = (...vec) => Vector.prototype.add.call(...vec);
