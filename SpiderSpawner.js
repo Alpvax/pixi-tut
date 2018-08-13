@@ -17,9 +17,8 @@ let spiderFactory = new EntityFactory("spider", () => {
     spider.pos.x = spawner.pos.x;
     spider.pos.y = spawner.pos.y;
     sprite.on("pointertap", (e) => {
+      spiders = spiders.filter((s) => s !== spider);
       spider.kill();
-      spiders = spiders.filter((s) => s !== this, spider);
-      console.log(spiders);//XXX
     });
     return spider;
   }, 3);

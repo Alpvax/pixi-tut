@@ -102,7 +102,9 @@ class EntityFactory {
   }
   die(entity) {
     this.count--;
-    this.dead.push(entity.displayObj);
+    let displayObj = entity.displayObj;
+    displayObj.visible = false;
+    this.dead.push(displayObj);
   }
   get canSpawn() {
     return this.limit < 0 || this.count < this.limit;

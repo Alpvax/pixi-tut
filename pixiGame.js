@@ -108,6 +108,11 @@ function play(delta) {
   spawner.rotateToPoint(player.pos);
   spawner.update();
   spiders.forEach((spider) => {
+    /*app.stage.children.forEach((c) => {
+      if(c === spider.displayObj) {
+        console.log(c);//XXX
+      }
+    });*/
     //if(!app.stage.children.contains(spider.sprite)) {
       app.stage.addChild(spider.displayObj);
     //}
