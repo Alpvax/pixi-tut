@@ -1,5 +1,99 @@
 "use strict"
 
+/**Base property descriptor */
+let baseDescript = ["x", "y", "magnitude", "angle"].reduce((obj, key) => {
+  obj[key] = Object.assign({
+    configurable: false,
+    enumerable: true
+  }, /*immutable ? {writable: false} : {}*/);
+  return obj;
+}, {});
+
+/**@param {object|string} [options] An optional object containing an "unpackedStyle" key, or a string, where the value of either is either "xy" or "am" as below.
+ * @param {string} options.unpackedStyle either "xy" or "am",
+ * depending on whether pairs of numbers should be recognised as an (x,y) pairing or an (angle,magnitude) pairing.
+ */
+function reducePoints(options, ...args) {
+  let type = "xy";
+  if(typeof options === "object" && "unpackedStyle" in options) {
+    type = options.unpackedStyle;
+  } else if(typeof options === "string") {
+    type = options;
+  } else {
+    args.unshift(options);
+  }
+  let result = args.reduce((result, val, index) => {
+    if("prev" in result && isNaN(val)) {
+      throw new Error(`Mismatched vector point pairing: {${type[0]}: ${result.prev}, ${type[1]}: NaN(${JSON.stringify(val)})}`);
+    }
+    let prev = result.prev;
+    switch(typeof val) {
+      case "number":
+        if(result.prev !== undefined) {
+          result.points.push({[type[0]]: result.prev, [type[1]]: val});
+          delete result.prev;
+        } else {
+          result.prev = val;
+        }
+        break;
+      case "object":
+        if(("x" in val && "y" in val) ||
+          ("angle" in val && "magnitude" in val) ||
+          ("a" in val && "m" in val)) {
+          result.points.push(val);
+        }
+        break;
+      default:
+        if(index === args.length - 1 && typeof val === "boolean") {
+          result.immutable = val;
+        } else {
+          console.warn("Ignoring unhandled non-point, non-numeric value: ", val);
+        }
+        break;
+    }
+    return result;
+  }, {points: []});
+  if(result.prev) {
+    throw new Error("Mismatching number of numeric args, remaining value: " + result.prev);
+  }
+  return Object.defineProperties({}, {
+    points: {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: result.points
+    },
+    immutable: {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: !!result.immutable
+    },
+    length: {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: result.points.length
+    },
+    [Symbol.iterator]: {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: function*() {
+        yield* result.points;
+      }
+    },
+    forEach: {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value(callback, thisArg) {
+        result.points.forEach(callback, thisArg);
+      }
+    }
+  });
+}
+
 class Vector {
   /**
    * @param {object|number} point Either the x co-ord, or an object with properties x and y
@@ -16,13 +110,6 @@ class Vector {
     if(isNaN(x) || isNaN(y)) {
       throw new Error(`Both x: (${x}) and y: (${y}) must be numeric in a vector`);
     }
-    let baseDescript = ["x", "y", "magnitude", "angle"].reduce((obj, key) => {
-      obj[key] = Object.assign({
-        configurable: false,
-        enumerable: true
-      }, immutable ? {writable: false} : {});
-      return obj;
-    }, {});
     let propDescript;
     if(immutable) {//Define immutable properties
       propDescript = {
