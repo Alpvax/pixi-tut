@@ -102,6 +102,16 @@ function reducePoints(options, ...args) {
   });
 }
 
+function setVectorValues(vec, x, y) {
+  if(vec.immutable) {
+    return new Vector(x, y);
+  } else {
+    vec.x = x;
+    vec.y = y;
+    return vec;
+  }
+}
+
 class Vector {
   /**
    * @param {object|number} point Either the x co-ord, or an object with properties x and y
@@ -186,15 +196,6 @@ class Vector {
       enumerable: false
     });
   }
-  __getUpdated(x, y) {
-    if(this.immutable) {
-      return new Vector(x, y);
-    } else {
-      this.x = x;
-      this.y = y;
-      return this;
-    }
-  }
   toString(listMagAng) {
     return `Vector{x: ${this.x}, y: ${this.y + (listMagAng ? `, magnitude: ${this.magnitude}, angle: ${this.angle}` : "")}}`;
   }
@@ -205,13 +206,13 @@ class Vector {
       x += v.x;
       y += v.y;
     });
-    return this.__getUpdated(x, y);
+    return setVectorValues(this, x, y);
   }
   subtract(...vec) {
     return Vector.add(this, ...vec.map(Vector.invert));//Allow calling via Vector.subtract()
   }
   invert() {
-    return this.__getUpdated(-this.x, -this.y);
+    return setVectorValues(this, -this.x, -this.y);
   }
   scale(mult) {
     return Vector.dot(this, {x: mult, y: mult});//Allow calling via Vector.scale()
@@ -223,7 +224,7 @@ class Vector {
       x *= v.x;
       y *= v.y;
     });
-    return this.__getUpdated(x, y);
+    return setVectorValues(this, x, y);
   }
   unit() {
     return this.scale(1 / this.magnitude);
@@ -233,7 +234,7 @@ class Vector {
     let ang = this.angle;
     let x = Math.cos(ang + angle);
     let y = Math.sin(ang + angle);
-    return this.__getUpdated(x, y);
+    return setVectorValues(this, x, y);
   }
 }
 Vector.Mutable = class extends Vector {
