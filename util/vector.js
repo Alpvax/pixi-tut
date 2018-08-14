@@ -1,5 +1,3 @@
-"use strict"
-
 /**Base property descriptor */
 let baseDescript = ["x", "y", "magnitude", "angle"].reduce((obj, key) => {
   obj[key] = Object.assign({

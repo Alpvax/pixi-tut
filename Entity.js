@@ -1,5 +1,3 @@
-"use strict";
-
 import Attribute from "./Attribute.js";
 
 export default class Entity {

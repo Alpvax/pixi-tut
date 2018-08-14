@@ -1,5 +1,3 @@
-"use strict";
-
 export default function CachedValue(calculate) {
   let val;
   let dirty = true;
