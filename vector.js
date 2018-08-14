@@ -69,6 +69,14 @@ function reducePoints(options, ...args) {
       writable: false,
       value: !!result.immutable
     },
+    asVectors: {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: result.immutable ?
+        () => result.points.map((p) => new Vector.Immutable(p)) :
+        () => result.points.map((p) => new Vector.Mutable(p))
+    },
     length: {
       enumerable: true,
       configurable: false,
