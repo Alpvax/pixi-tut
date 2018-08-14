@@ -1,4 +1,4 @@
-var defaultKeybindings = {
+export default {
   "default": [
     {
       "key": "A",

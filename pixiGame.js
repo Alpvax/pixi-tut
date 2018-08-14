@@ -1,4 +1,9 @@
-import Entity, {EntityFactory} from "./Entity.js";
+"use strict";
+
+import Entity/*, {EntityFactory}*/ from "./Entity.js";
+import SpiderSpawner from "./SpiderSpawner.js";
+import {InputAction, Keybind} from "./Input.js";
+import Vector from "./util/vector.js";
 
 // Aliases
 const loader = PIXI.loader;
@@ -20,7 +25,7 @@ let state = play;
 let spiders = [];
 let spawner;
 
-loader.add("Bug.png")
+loader.add("Bug.png", "assets/Bug.png")
   .on("progress", (loader, resource) => {
     console.debug(`Loading: ${loader.progress}%. Loaded ${resource.url}`);
   })
@@ -106,7 +111,7 @@ function play(delta) {
   player.update();
   app.stage.position.set(app.view.width / 2 - player.pos.x, app.view.height / 2 - player.pos.y);
   spawner.rotateToPoint(player.pos);
-  spawner.update();
+  spawner.update(spiders);//TODO: remove passing to update
   spiders.forEach((spider) => {
     //if(!app.stage.children.contains(spider.sprite)) {
       app.stage.addChild(spider.sprite);

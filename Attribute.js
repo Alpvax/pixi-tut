@@ -1,4 +1,4 @@
-class Attribute {
+export default class Attribute {
   constructor(base) {
     this.baseValue = base;
     this.modifiers = new Map();
