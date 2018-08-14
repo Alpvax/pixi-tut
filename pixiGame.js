@@ -1,6 +1,7 @@
+import Entity, {EntityFactory} from "./Entity.js";
+
 // Aliases
-const loader = PIXI.loader,
-    resources = PIXI.loader.resources;
+const loader = PIXI.loader;
 
 document.addEventListener('contextmenu', event => event.preventDefault());
 
