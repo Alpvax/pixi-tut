@@ -1,4 +1,5 @@
 "use strict"
+
 import Entity from "./Entity.js";
 const resources = PIXI.loader.resources;
 

@@ -1,4 +1,5 @@
 "use strict";
+
 import defaultKeybindings from "./defaultKeys.js";
 
 const Input = new Map();

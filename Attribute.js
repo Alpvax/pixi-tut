@@ -1,3 +1,5 @@
+"use strict";
+
 export default class Attribute {
   constructor(base) {
     this.baseValue = base;
