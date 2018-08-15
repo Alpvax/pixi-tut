@@ -3,6 +3,7 @@
 import Entity/*, {EntityFactory}*/ from "./Entity.js";
 import SpiderSpawner from "./SpiderSpawner.js";
 import {InputAction, Keybind} from "./Input.js";
+import gestures from "./gestures.js";
 //TODO: Fix Vectors: import Vector from "./util/vector.js";
 
 // Aliases
@@ -95,10 +96,13 @@ function setup() {
   interaction.on("pointerdown", (e) => {
     player.rotationSpeed.addModifier({key: "combatMode", baseMult: 0.5});
     player.moveSpeed.addModifier({key: "combatMode", baseMult: 0.3});
+    gestures.startGesture(e, app.stage);
   });
+  interaction.on("pointermove", (e) => gestures.gestureMove(e, app.stage));
   interaction.on("pointerup", (e) => {
     player.rotationSpeed.removeModifier("combatMode");
     player.moveSpeed.removeModifier("combatMode");
+    gestures.endGesture(e);
   });
 
   app.ticker.add(delta => gameLoop(delta));
@@ -115,6 +119,7 @@ function play(delta) {
   app.stage.position.set(app.view.width / 2 - player.pos.x, app.view.height / 2 - player.pos.y);
   spawner.rotateToPoint(player.pos);
   spawner.update(spiders);//TODO: remove passing to update
+  /*Disabled spiders
   spiders.forEach((spider) => {
     app.stage.addChild(spider.sprite);
     spider.rotateToPoint(player.pos);
@@ -126,6 +131,7 @@ function play(delta) {
     spider.vel.y = Math.sin(a) * speed;
     spider.update();
   });
+  */
 }
 
 /*function keyboard(...labels) {
