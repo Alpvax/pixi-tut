@@ -17,7 +17,7 @@ export default class GestureManager {
         gesture.graphic.endFill();
       }
     }
-    console.log(gesture.points);
+    gesture.normalisePoints();
   }
 }
 
@@ -61,5 +61,25 @@ export class DrawnGesture {
       .moveTo(Math.round(start.x), Math.round(start.y));
     this.points.slice(1).forEach((p) => this.graphic.lineTo(Math.round(p.x), Math.round(p.y)));
     this.graphic.endFill();
+  }
+  normalisePoints() {
+    let playerRelative = this.points.map((point) => {
+      return {
+        x: point.x - player.pos.x,
+        y: point.y - player.pos.y
+      };
+    });//TODO: Fix Vector subtract
+    let points = playerRelative.reduce((res, point) => {
+      if(res.prev) {
+        let v = {
+          distance: res.prev.magnitude - point.magnitude,
+          rotation: res.prev.angle - point.angle
+        };
+        res.vecs.push(v);
+      }
+      res.prev = point;
+      return res;
+    }, {vecs: [], prev: undefined});
+    console.log(points);
   }
 }
