@@ -21,6 +21,9 @@ export default class GestureManager {
   }
 }
 
+const DIST_THRESHOLD = 20;
+const ROT_THRESHOLD = Math.PI / 8; //1/16th of a circle
+
 let gesture;
 
 export class DrawnGesture {
@@ -69,17 +72,42 @@ export class DrawnGesture {
         y: point.y - player.pos.y
       };
     });//TODO: Fix Vector subtract
-    let points = playerRelative.reduce((res, point) => {
+    let deltas = playerRelative.reduce((res, vec) => {
       if(res.prev) {
         let v = {
-          distance: res.prev.magnitude - point.magnitude,
-          rotation: res.prev.angle - point.angle
+          d: vec.magnitude - res.prev.magnitude,
+          r: vec.angle - res.prev.angle
         };
-        res.vecs.push(v);
+        res.vecs.push({
+          distance: Math.abs(v.d) < DIST_THRESHOLD ? 0 : Math.sign(v.d),
+          rotation: Math.abs(v.r) < ROT_THRESHOLD ? 0 : Math.sign(v.r),
+        });
       }
-      res.prev = point;
+      res.prev = vec;
       return res;
-    }, {vecs: [], prev: undefined});
+    }, {vecs: [], prev: undefined}).vecs;
+    let points = deltas.reduce((res, vec) => {
+      if(res.length > 0) {
+        let prev = res.pop();
+        let next;
+        /**Distance unchanged*/
+        let d = Math.sign(prev.distance) === Math.sign(vec.distance);
+        /**Rotation unchanged*/
+        let r = Math.sign(prev.rotation) === Math.sign(vec.rotation);
+        if(d && r) {
+          prev.magnitude++;
+        } else {
+          next = Object.assign(vec, {magnitude: 1});
+        }
+        res.push(prev);
+        if(next) {
+          res.push(next);
+        }
+      } else {
+        res.push(Object.assign(vec, {magnitude: 1}));
+      }
+      return res;
+    }, []);
     console.log(points);
   }
 }
