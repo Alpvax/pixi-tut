@@ -56,18 +56,12 @@ function reducePoints(options, ...args) {
   if(result.prev) {
     throw new Error("Mismatching number of numeric args, remaining value: " + result.prev);
   }
-  return Object.defineProperties({}, {
-    points: {
-      enumerable: true,
-      configurable: false,
-      writable: false,
-      value: result.points
-    },
+  return Object.defineProperties(result.points, {
     immutable: {
       enumerable: true,
       configurable: false,
       writable: false,
-      value: !!result.immutable
+      value: result.immutable !== false //true by default
     },
     asVectors: {
       enumerable: false,
@@ -76,35 +70,13 @@ function reducePoints(options, ...args) {
       value: result.immutable ?
         () => result.points.map((p) => new Vector.Immutable(p)) :
         () => result.points.map((p) => new Vector.Mutable(p))
-    },
-    length: {
-      enumerable: true,
-      configurable: false,
-      writable: false,
-      value: result.points.length
-    },
-    [Symbol.iterator]: {
-      enumerable: false,
-      configurable: false,
-      writable: false,
-      value: function*() {
-        yield* result.points;
-      }
-    },
-    forEach: {
-      enumerable: false,
-      configurable: false,
-      writable: false,
-      value(callback, thisArg) {
-        result.points.forEach(callback, thisArg);
-      }
     }
   });
 }
 
 function setVectorValues(vec, x, y) {
   if(vec.immutable) {
-    return new Vector(x, y);
+    return new Vector.Immutable({x, y});
   } else {
     vec.x = x;
     vec.y = y;
@@ -114,19 +86,42 @@ function setVectorValues(vec, x, y) {
 
 class Vector {
   /**
-   * @param {object|number} point Either the x co-ord, or an object with properties x and y
-   * @param {number} point.x The x co-ord of the point
-   * @param {number} point.y The y co-ord of the point
-   * @param {number} [y] The y co-ord of the point
+   * @param {object} point An object with either the properties x and y, or the properties a and m (or angle and magnitude)
+   * @param {number} [point.x] The x co-ord of the point
+   * @param {number} [point.y] The y co-ord of the point
+   * @param {number} [point.a] The x co-ord of the point
+   * @param {number} [point.m] The y co-ord of the point
+   * @param {number} [point.angle] The x co-ord of the point
+   * @param {number} [point.magnitude] The y co-ord of the point
    */
-  constructor(point, y, immutable=false) {
-    let x = point;
-    if(typeof point === "object") {
-      x = point.x;
-      y = point.y;
+  constructor(point, immutable=true) {
+    let vecs = reducePoints(...arguments);
+    if(vecs.length !== 1) {
+      throw new Error("Invalid vector arguments:\n", vecs);
     }
-    if(isNaN(x) || isNaN(y)) {
-      throw new Error(`Both x: (${x}) and y: (${y}) must be numeric in a vector`);
+    point = vecs[0];
+    immutable = vecs.immutable;//*/
+    let x = point.x;
+    let y = point.y;
+    let angle = point.angle !== undefined ? point.angle : point.a;
+    let magnitude = point.magnitude !== undefined ? point.magnitude : point.m;
+    let nan = {x: isNaN(x), y: isNaN(y), a: isNaN(angle), m: isNaN(magnitude)};
+    let numNaN = Object.values(nan).reduce((a, b) => a + b);
+    if(numNaN > 2) {
+      throw new Error(`A vector must have at least 2 of the following numeric values defined:
+        \tx: ${x},
+        \ty: ${y},
+        \tangle (or a): ${angle},
+        \tmagnitude (or m): ${magnitude}`);
+    }
+    if(!nan.x && !nan.y) { //x & y
+        magnitude = Math.sqrt(x * x + y * y);
+        angle = Math.atan2(y, x);
+    } else if(!nan.a && !nan.m) { //angle & magnitude
+      x = magnitude * Math.cos(angle);
+      y = magnitude * Math.sin(angle);
+    } else {
+      throw new Error("Mixing a/m and x/y parameters for vector definitions is not supported");
     }
     let propDescript;
     if(immutable) {//Define immutable properties
@@ -202,29 +197,29 @@ class Vector {
   add(...vec) {
     let x = this.x || 0;//Allow calling via Vector.add()
     let y = this.y || 0;
-    vec.forEach((v) => {
+    reducePoints(...vec).forEach((v) => {
       x += v.x;
       y += v.y;
     });
     return setVectorValues(this, x, y);
   }
   subtract(...vec) {
-    return Vector.add(this, ...vec.map(Vector.invert));//Allow calling via Vector.subtract()
+    return Vector.add(this, ...reducePoints(...vec).asVectors().map(Vector.invert));//Allow calling via Vector.subtract()
   }
   invert() {
     return setVectorValues(this, -this.x, -this.y);
   }
   scale(mult) {
-    return Vector.dot(this, {x: mult, y: mult});//Allow calling via Vector.scale()
+    return setVectorValues(this, this.x * mult, this.y * mult);//Allow calling via Vector.scale()
   }
   dot(...vec) {
     let x = this.x === undefined ? 1 : this.x;//Allow calling via Vector.add()
     let y = this.y === undefined ? 1 : this.y;
-    vec.forEach((v) => {
+    reducePoints(...vec).forEach((v) => {
       x *= v.x;
       y *= v.y;
     });
-    return setVectorValues(this, x, y);
+    return x + y;
   }
   unit() {
     return this.scale(1 / this.magnitude);
@@ -232,27 +227,36 @@ class Vector {
   rotate(angle) {
     let mag = this.magnitude;
     let ang = this.angle;
-    let x = Math.cos(ang + angle);
-    let y = Math.sin(ang + angle);
+    let x = mag * Math.cos(ang + angle);
+    let y = mag * Math.sin(ang + angle);
     return setVectorValues(this, x, y);
   }
 }
 Vector.Mutable = class extends Vector {
-  constructor(point, y) {
-    super(point, y, false);
+  constructor(point) {
+    super(point, false);
+  }
+  static [Symbol.hasInstance](obj) {
+    return obj instanceof Vector && !obj.immutable;
   }
 }
 Vector.Immutable = class extends Vector {
-  constructor(point, y) {
-    super(point, y, true);
+  constructor(point) {
+    super(point, true);
+  }
+  static [Symbol.hasInstance](obj) {
+    return obj instanceof Vector && obj.immutable;
   }
 }
 
-Vector.add = (...vec) => Vector.prototype.add.call(...vec);
-Vector.subtract = (vec, ...sub) => Vector.prototype.subtract.call(vec, ...sub);
+Vector.add = (...vec) => Vector.prototype.add(...vec);
+Vector.subtract = function(vec, ...sub) {
+  let vecs = reducePoints(...arguments);
+  return Vector.prototype.subtract.call(vecs.shift(), ...vecs);
+}
 Vector.invert = (vec) => Vector.prototype.invert.call(vec);
 Vector.scale = (vec, mult) => Vector.prototype.scale.call(vec, mult);
-Vector.dot = (...vec) => Vector.prototype.dot.call(...vec);
+Vector.dot = (...vec) => Vector.prototype.dot(...vec);
 Vector.magnitude = function(vec) {
   return new Vector(...arguments).magnitude;
 };
@@ -262,4 +266,6 @@ Vector.angle = function(vec) {
 Vector.unit = function(vec) {
   return new Vector(...arguments).unit;
 }
-Vector.rotate = (vec, angle) => new Vector(vec).rotate(angle);
+Vector.rotate = function(vec, angle) {
+  return new Vector(arguments).rotate(arguments[arguments.length - 1]);
+}
