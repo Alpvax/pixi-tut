@@ -17,7 +17,8 @@ export default class GestureManager {
         gesture.graphic.endFill();
       }
     }
-    gesture.normalisePoints();
+    console.log(gesture.points);
+    //gesture.normalisePoints();
   }
 }
 
@@ -62,25 +63,17 @@ export class DrawnGesture {
     this.graphic.clear()
       .lineStyle(this.lineWeight, this.lineColour)
       .moveTo(Math.round(start.x), Math.round(start.y));
-    this.points.slice(1).forEach((p) => this.graphic.lineTo(Math.round(p.x), Math.round(p.y)));
+    this.points.slice(1).forEach((p) => this.graphic.lineTo(p.x, p.y));
     this.graphic.endFill();
   }
   normalisePoints() {
-    let playerRelative = this.points.map((point) => {
-      return {
-        x: point.x - player.pos.x,
-        y: point.y - player.pos.y
-      };
-    });//TODO: Fix Vector subtract
-    let deltas = playerRelative.reduce((res, vec) => {
+    let deltas = this.points.reduce((res, vec) => {
       if(res.prev) {
-        let v = {
-          d: vec.magnitude - res.prev.magnitude,
-          r: vec.angle - res.prev.angle
-        };
+        let d = vec.magnitude - res.prev.magnitude;
+        let r = vec.angle - res.prev.angle;
         res.vecs.push({
-          distance: Math.abs(v.d) < DIST_THRESHOLD ? 0 : Math.sign(v.d),
-          rotation: Math.abs(v.r) < ROT_THRESHOLD ? 0 : Math.sign(v.r),
+          distance: Math.abs(d) < DIST_THRESHOLD ? 0 : Math.sign(d),
+          rotation: Math.abs(r) < ROT_THRESHOLD ? 0 : Math.sign(r),
         });
       }
       res.prev = vec;

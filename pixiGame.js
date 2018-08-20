@@ -96,9 +96,9 @@ function setup() {
   interaction.on("pointerdown", (e) => {
     player.rotationSpeed.addModifier({key: "combatMode", baseMult: 0.5});
     player.moveSpeed.addModifier({key: "combatMode", baseMult: 0.3});
-    gestures.startGesture(e, app.stage);
+    gestures.startGesture(e, player.sprite);
   });
-  interaction.on("pointermove", (e) => gestures.gestureMove(e, app.stage));
+  interaction.on("pointermove", (e) => gestures.gestureMove(e, player.sprite));
   interaction.on("pointerup", (e) => {
     player.rotationSpeed.removeModifier("combatMode");
     player.moveSpeed.removeModifier("combatMode");
