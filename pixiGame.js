@@ -1,8 +1,14 @@
-// Aliases
-const loader = PIXI.loader,
-    resources = PIXI.loader.resources;
+"use strict";
 
-document.addEventListener('contextmenu', event => event.preventDefault());
+import Entity/*, {EntityFactory}*/ from "./Entity.js";
+import SpiderSpawner from "./SpiderSpawner.js";
+import {InputAction, Keybind} from "./Input.js";
+//TODO: Fix Vectors: import Vector from "./util/vector.js";
+
+// Aliases
+const loader = PIXI.loader;
+
+document.addEventListener("contextmenu", event => event.preventDefault());
 
 let app = new PIXI.Application({width: 400, height: 400});
 document.body.appendChild(app.view);
@@ -19,7 +25,7 @@ let state = play;
 let spiders = [];
 let spawner;
 
-loader.add("Bug.png")
+loader.add("Bug.png", "assets/Bug.png")
   .on("progress", (loader, resource) => {
     console.debug(`Loading: ${loader.progress}%. Loaded ${resource.url}`);
   })
@@ -63,13 +69,15 @@ function setup() {
     let speed = player.moveSpeed.value;
     let h = 0;
     let v = 0;
+    /*eslint-disable curly*/
     if(actionWest.active)   h -= 1;
     if(actionEast.active)   h += 1;
     if(actionNorth.active)  v -= 1;
     if(actionSouth.active)  v += 1;
-    let modifier = (h != 0 && v != 0) ? //Moving in both axes
-          speed / Math.sqrt(2) : //adjust for diagonal movement (currently only 8-directional movement)
-          speed; //Otherwise speed value can be used directly
+    /*eslint-enable*/
+    let modifier = (h != 0 && v != 0) //Moving in both axes
+      ? speed / Math.sqrt(2) //adjust for diagonal movement (currently only 8-directional movement)
+      : speed; //Otherwise speed value can be used directly
     player.vel.x = h * modifier;
     player.vel.y = v * modifier;
   }
@@ -78,10 +86,10 @@ function setup() {
   let left  = new Keybind(actionWest , "A", {toggle:true}, "KeyA");
   let right = new Keybind(actionEast , "D", {toggle:true, onup: true}, "KeyD");
   */
-  let left  = new Keybind(actionWest , "A", {}, "KeyA");
-  let right = new Keybind(actionEast , "D", {}, "KeyD");
-  let up    = new Keybind(actionNorth, "W", {}, "KeyW");
-  let down  = new Keybind(actionSouth, "S", {}, "KeyS");
+  /*let left  = */new Keybind(actionWest , "A", {}, "KeyA");
+  /*let right = */new Keybind(actionEast , "D", {}, "KeyD");
+  /*let up    = */new Keybind(actionNorth, "W", {}, "KeyW");
+  /*let down  = */new Keybind(actionSouth, "S", {}, "KeyS");
 
   // Pointers normalize touch and mouse
   interaction.on("pointerdown", (e) => {
@@ -101,15 +109,14 @@ function gameLoop(delta) {
 }
 
 function play(delta) {
-  player.rotateToPoint(Vector.add(interaction.mouse.global, player.pos, {x: -app.view.width / 2, y: -app.view.height / 2}));
+  //player.rotateToPoint(Vector.add(interaction.mouse.global, player.pos, {x: -app.view.width / 2, y: -app.view.height / 2}));TODO: Fix Vectors
+  player.rotateToPoint([interaction.mouse.global, player.pos, {x: -app.view.width / 2, y: -app.view.height / 2}].reduce((a, b) => ({x: a.x + b.x, y: a.y + b.y})));//TODO: Fix Vectors
   player.update();
   app.stage.position.set(app.view.width / 2 - player.pos.x, app.view.height / 2 - player.pos.y);
   spawner.rotateToPoint(player.pos);
-  spawner.update();
+  spawner.update(spiders);//TODO: remove passing to update
   spiders.forEach((spider) => {
-    //if(!app.stage.children.contains(spider.sprite)) {
-      app.stage.addChild(spider.sprite);
-    //}
+    app.stage.addChild(spider.sprite);
     spider.rotateToPoint(player.pos);
     let x = player.pos.x - spider.pos.x;
     let y = player.pos.y - spider.pos.y;

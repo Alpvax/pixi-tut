@@ -1,6 +1,8 @@
+import defaultKeybindings from "./defaultKeys.js";
+
 const Input = new Map();
 
-class InputAction {
+export class InputAction {
   constructor(id, toggleable, callbacks) {
     this.id = id;
     this.toggleable = toggleable;
@@ -43,7 +45,7 @@ class InputAction {
   }
 }
 
-class Keybind {
+export class Keybind {
   /**
    * @param {InputAction} action The InputAction to trigger
    * @param {string} key The key name (i.e. "Enter") for use in the display.

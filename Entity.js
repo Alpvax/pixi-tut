@@ -1,4 +1,6 @@
-class Entity {
+import Attribute from "./Attribute.js";
+
+export default class Entity {
   constructor(sprite, moveSpeed = 5, rotationsPerSecond = 1) {
     this.sprite = sprite;
     this.pos = {x: sprite.x, y: sprite.y};

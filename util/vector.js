@@ -1,5 +1,3 @@
-"use strict"
-
 /**Base property descriptor */
 let baseDescript = ["x", "y", "magnitude", "angle"].reduce((obj, key) => {
   obj[key] = Object.assign({
@@ -84,7 +82,7 @@ function setVectorValues(vec, x, y) {
   }
 }
 
-class Vector {
+export default class Vector {
   /**
    * @param {object} point An object with either the properties x and y, or the properties a and m (or angle and magnitude)
    * @param {number} [point.x] The x co-ord of the point

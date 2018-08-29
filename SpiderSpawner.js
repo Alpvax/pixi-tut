@@ -1,4 +1,7 @@
-class SpiderSpawner extends Entity {
+import Entity from "./Entity.js";
+const resources = PIXI.loader.resources;
+
+export default class SpiderSpawner extends Entity {
   constructor(rotationsPerSecond = 0.1) {
     super(new PIXI.Sprite(resources["Bug.png"].texture));
     this.sprite.scale.set(4);
@@ -17,7 +20,7 @@ class SpiderSpawner extends Entity {
     return spider;
   }
 
-  update() {
+  update(spiders) {
     super.update();
     if(spiders.length < 3 && Math.random() * 200 < 1) {
       spiders.push(this.spawnSpider());
