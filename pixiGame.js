@@ -8,7 +8,7 @@ import Vector from "./util/vector.js";
 // Aliases
 const loader = PIXI.loader;
 
-document.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener("contextmenu", event => event.preventDefault());
 
 let app = new PIXI.Application({width: 400, height: 400});
 document.body.appendChild(app.view);
@@ -69,13 +69,15 @@ function setup() {
     let speed = player.moveSpeed.value;
     let h = 0;
     let v = 0;
+    /*eslint-disable curly*/
     if(actionWest.active)   h -= 1;
     if(actionEast.active)   h += 1;
     if(actionNorth.active)  v -= 1;
     if(actionSouth.active)  v += 1;
-    let modifier = (h != 0 && v != 0) ? //Moving in both axes
-          speed / Math.sqrt(2) : //adjust for diagonal movement (currently only 8-directional movement)
-          speed; //Otherwise speed value can be used directly
+    /*eslint-enable*/
+    let modifier = (h != 0 && v != 0) //Moving in both axes
+      ? speed / Math.sqrt(2) //adjust for diagonal movement (currently only 8-directional movement)
+      : speed; //Otherwise speed value can be used directly
     player.vel.x = h * modifier;
     player.vel.y = v * modifier;
   }
@@ -84,10 +86,10 @@ function setup() {
   let left  = new Keybind(actionWest , "A", {toggle:true}, "KeyA");
   let right = new Keybind(actionEast , "D", {toggle:true, onup: true}, "KeyD");
   */
-  let left  = new Keybind(actionWest , "A", {}, "KeyA");
-  let right = new Keybind(actionEast , "D", {}, "KeyD");
-  let up    = new Keybind(actionNorth, "W", {}, "KeyW");
-  let down  = new Keybind(actionSouth, "S", {}, "KeyS");
+  /*let left  = */new Keybind(actionWest , "A", {}, "KeyA");
+  /*let right = */new Keybind(actionEast , "D", {}, "KeyD");
+  /*let up    = */new Keybind(actionNorth, "W", {}, "KeyW");
+  /*let down  = */new Keybind(actionSouth, "S", {}, "KeyS");
 
   // Pointers normalize touch and mouse
   interaction.on("pointerdown", (e) => {
@@ -113,9 +115,7 @@ function play(delta) {
   spawner.rotateToPoint(player.pos);
   spawner.update(spiders);//TODO: remove passing to update
   spiders.forEach((spider) => {
-    //if(!app.stage.children.contains(spider.sprite)) {
-      app.stage.addChild(spider.sprite);
-    //}
+    app.stage.addChild(spider.sprite);
     spider.rotateToPoint(player.pos);
     let x = player.pos.x - spider.pos.x;
     let y = player.pos.y - spider.pos.y;
