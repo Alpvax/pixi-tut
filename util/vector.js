@@ -1,29 +1,61 @@
+import CachedValue from "./cachedValue.js";
+
 export function MutableVector(x, y) {
   if(!(this instanceof MutableVector)) {
     return new MutableVector(x, y);
   }
-  let p = parseArgs(x, y);
+  ({x, y} = parseArgs(x, y));
+  function setXY(xv, yv) {
+    x = xv;
+    y = yv;
+    magSquared.invalidate();
+    magnitude.invalidate();
+    angle.invalidate();
+  }
+  function setAM(angle, magnitude) {
+    setXY(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
+  }
+  let magSquared = CachedValue(() => x * x + y * y);
+  let magnitude = CachedValue(() => Math.sqrt(magSquared.value));
+  let angle = CachedValue(() => Math.atan2(y, x));
   return Object.defineProperties(this, {
     x: {
       configurable: false,
       enumerable: true,
+      get: () => x,
+      set(val) {
+        setXY(val, y);
+      }
     },
     y: {
       configurable: false,
       enumerable: true,
+      get: () => y,
+      set(val) {
+        setXY(x, val);
+      }
     },
     angle: {
       configurable: false,
       enumerable: true,
+      get: () => angle.value,
+      set(val) {
+        setAM(val, magnitude.value);
+      }
     },
     magnitude: {
       configurable: false,
       enumerable: true,
+      get: () => magnitude.value,
+      set(val) {
+        setAM(angle.value, val);
+      }
     },
     magSquared: {
       configurable: false,
       enumerable: true,
-      value: x*x + y*y
+      get: () => magSquared.value
+      //NO SETTER!
     }
   });
 };
@@ -53,10 +85,12 @@ Vector.Immutable = ImmutableVector;
 Vector.Mutable = MutableVector;
 export default Vector;
 
+Vector.copy = copy;
+
 function parseArgs(x, y) {
   if(typeof x === "object") {
-    x = x.x;
     y = x.y;
+    x = x.x;
   }
   if(isNaN(x) || isNaN(y)) {
     throw new Error(`A vector must have 2 numerical values defined:
@@ -89,7 +123,7 @@ function unit(vec) {
   return Vector.magnitude(newVec(vec), 1);
 }
 function copy(vec) {
-  return newVec(vec);
+  return /**/new vec.constructor(vec);//*/newVec(vec);
 }
 function inverted(vec) {
   return newVec(vec, -vec.x, -vec.y);
