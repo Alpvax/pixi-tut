@@ -85,7 +85,175 @@ Vector.Immutable = ImmutableVector;
 Vector.Mutable = MutableVector;
 export default Vector;
 
-Vector.copy = copy;
+[copy, equals, magnitude, angle, unit, add, subtract, inverted, scale, rotate].forEach((func) => Vector[func.name] = func);
+const sharedFuncs = {
+  //Non-modifying
+  inverted() {
+    Vector.inverted(this);
+  },
+  unit() {
+    return Vector.unit(this);
+  },
+  copy() {
+    return Vector.copy(this);
+  },
+  equals(vec, precision) {
+    return Vector.equals(this, vec, precision);
+  }
+};
+
+Object.assign(MutableVector.prototype, {
+  add(...others) {
+    let {x, y} = _do.add(this, ...others);
+    this.x = x;
+    this.y = y;
+    return this;
+  },
+  subtract(...others) {
+    let {x, y} = _do.subtract(this, ...others);
+    this.x = x;
+    this.y = y;
+    return this;
+  },
+  scale(amount) {
+    let {x, y} = _do.scale(this, amount);
+    this.x = x;
+    this.y = y;
+    return this;
+  },
+  rotate(amount) {
+    let {x, y} = _do.subtract(this, amount);
+    this.x = x;
+    this.y = y;
+    return this;
+  },
+  invert() {
+    this.x = -this.x;
+    this.y = -this.y;
+    return this;
+  }
+}, sharedFuncs);
+Object.assign(ImmutableVector.prototype, {
+  add(...others) {
+    console.debug("Creating new Vector instance while calling `ImmutableVector.add`\nStacktrace: " + new Error().stack);
+    return add(this, ...others);
+  },
+  subtract(...others) {
+    console.debug("Creating new Vector instance while calling `ImmutableVector.subtract`\nStacktrace: " + new Error().stack);
+    return subtract(this, ...others);
+  },
+  scale(amount) {
+    console.debug("Creating new Vector instance while calling `ImmutableVector.scale`\nStacktrace: " + new Error().stack);
+    return scale(this, amount);
+  },
+  rotate(amount) {
+    console.debug("Creating new Vector instance while calling `ImmutableVector.rotate`\nStacktrace: " + new Error().stack);
+    return rotate(this, amount);
+  },
+  invert() {
+    throw new TypeError("Cannot invert ImmutableVector: " + this);
+  }
+}, sharedFuncs);
+
+function magnitude(vec) {
+  if(arguments.length > 1) {
+    let mag = arguments[1];
+    if(isFinite(mag)) {
+      return Vector.scale(vec, mag / Vector.magnitude(vec));
+    }
+  }
+  return _do.magnitude(vec);
+}
+function angle(vec) {
+  if(arguments.length > 1) {
+    let ang = arguments[1];
+    if(isFinite(ang)) {
+      return Vector.rotate(vec, ang - Vector.angle(vec));
+    }
+  }
+  return _do.angle(vec);
+}
+function unit(vec) {
+  return newVec(_do.unit(vec));
+}
+function equals(vec1, vec2, precision) {
+  if(precision) {
+    return Math.abs(vec1.x - vec2.y) < precision && Math.abs(vec1.y - vec2.y) < precision;
+  }
+  return vec1.x === vec2.x && vec1.y === vec2.y;
+}
+function copy(vec) {
+  return newVec(vec);
+}
+function inverted(vec) {
+  return newVec(vec, -vec.x, -vec.y);
+}
+function add(vec, ...others) {
+  return newVec(vec, _do.add(vec, ...others));
+}
+function subtract(vec, ...others) {
+  return newVec(vec, _do.subtract(vec, ...others));
+}
+function scale(vec, amount) {
+  return newVec(vec, _do.scale(vec, amount));
+}
+function rotate(vec, angle) {
+  return newVec(vec, _do.rotate(vec, angle));
+}
+const _do = { //magnitude, angle, unit, add, subtract, scale, rotate
+  add(...vecs) {
+    return vecs.reduce((a, b) => {
+      return {
+        x: a.x + b.x,
+        y: a.y + b.y
+      };
+    }, {x: 0, y: 0});
+  },
+  subtract(...vecs) {
+    return vecs.reduce((a, b) => {
+      return {
+        x: a.x - b.x,
+        y: a.y - b.y
+      };
+    }, vecs.shift());//Start with first vec positive
+  },
+  scale({x, y}, amount) {
+    return {
+      x: x * amount,
+      y: y * amount
+    };
+  },
+  rotate(vec, angle) {
+    let mag = _do.magnitude(vec);
+    let ang = _do.angle(vec);
+    return {
+      x: mag * Math.cos(ang + angle),
+      y: mag * Math.sin(ang + angle)
+    };
+  },
+  unit({x, y}) {
+    let mag = Math.sqrt(x * x + y * y);
+    return {
+      x: x / mag,
+      y: y / mag
+    };
+  },
+  magnitude(vec) {
+    if(vec instanceof Vector) {
+      return vec.magnitude;
+    }
+    return Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+  },
+  angle(vec) {
+    if(vec instanceof Vector) {
+      return vec.angle;
+    }
+    return Math.atan2(vec.y, vec.x);
+  }
+};
+
+
+//******* Internal Functions *******//
 
 function parseArgs(x, y) {
   if(typeof x === "object") {
@@ -101,52 +269,7 @@ function parseArgs(x, y) {
   return {x, y, magnitude: Math.sqrt(magSquared), magSquared, angle};
 }
 
-function magnitude(vec) {
-  if(arguments.length > 1) {
-    let mag = arguments[1];
-    if(isFinite(mag)) {
-      return Vector.scale(vec, mag / Vector.magnitude(vec));
-    }
-  }
-  return Math.sqrt(vec.x *vec.x + vec.y * vec.y);
-}
-function angle(vec) {
-  if(arguments.length > 1) {
-    let ang = arguments[1];
-    if(isFinite(ang)) {
-      return Vector.rotate(vec, ang - Vector.angle(vec));
-    }
-  }
-  return Math.atan2(vec.y, vec.x);
-}
-function unit(vec) {
-  return Vector.magnitude(newVec(vec), 1);
-}
-function copy(vec) {
-  return /**/new vec.constructor(vec);//*/newVec(vec);
-}
-function inverted(vec) {
-  return newVec(vec, -vec.x, -vec.y);
-}
-function add(vec, ...others) {
-  return newVec(vec, {
-    x: others.reduce((a, b) => a.x + b.x, vec.x),
-    y: others.reduce((a, b) => a.y + b.y, vec.y)
-  });
-}
-function subtract(vec, ...others) {
-  return Vector.add(vec, others.map((v) => ({x: -v.x, y: -v.y})));
-}
-function scale(vec, amount) {
-  return newVec(vec, vec.x * amount, vec.y * amount);
-}
-function rotate(vec, angle) {
-  let mag = Vector.magnitude(vec);
-  let ang = Vector.angle(vec);
-  return newVec(vec, mag * Math.cos(ang + angle), mag * Math.sin(ang + angle));
-}
-
 function newVec(vec, ...args) {
-  args = args.length ? args : vec;
+  args = args.length ? args : [vec];
   return new (vec[Symbol.species] || vec.constructor)(...args);
 }
