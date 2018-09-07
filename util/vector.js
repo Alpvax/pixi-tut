@@ -89,7 +89,7 @@ export default Vector;
 const sharedFuncs = {
   //Non-modifying
   inverted() {
-    Vector.inverted(this);
+    return Vector.inverted(this);
   },
   unit() {
     return Vector.unit(this);
@@ -122,7 +122,7 @@ Object.assign(MutableVector.prototype, {
     return this;
   },
   rotate(amount) {
-    let {x, y} = _do.subtract(this, amount);
+    let {x, y} = _do.rotate(this, amount);
     this.x = x;
     this.y = y;
     return this;
@@ -177,10 +177,14 @@ function unit(vec) {
   return newVec(_do.unit(vec));
 }
 function equals(vec1, vec2, precision) {
-  if(precision) {
-    return Math.abs(vec1.x - vec2.y) < precision && Math.abs(vec1.y - vec2.y) < precision;
+  if(vec1 === vec2) {
+    return true;
   }
-  return vec1.x === vec2.x && vec1.y === vec2.y;
+  if(isNaN(precision)) {
+    precision = 0;
+  }
+  precision += Number.EPSILON;
+  return Math.abs(vec1.x - vec2.x) <= precision && Math.abs(vec1.y - vec2.y) <= precision;
 }
 function copy(vec) {
   return newVec(vec);
@@ -200,6 +204,10 @@ function scale(vec, amount) {
 function rotate(vec, angle) {
   return newVec(vec, _do.rotate(vec, angle));
 }
+
+
+//******* Internal Functions *******//
+
 const _do = { //magnitude, angle, unit, add, subtract, scale, rotate
   add(...vecs) {
     return vecs.reduce((a, b) => {
@@ -231,11 +239,11 @@ const _do = { //magnitude, angle, unit, add, subtract, scale, rotate
       y: mag * Math.sin(ang + angle)
     };
   },
-  unit({x, y}) {
-    let mag = Math.sqrt(x * x + y * y);
+  unit(vec) {
+    let mag = _do.magnitude(vec);
     return {
-      x: x / mag,
-      y: y / mag
+      x: vec.x / mag,
+      y: vec.y / mag
     };
   },
   magnitude(vec) {
@@ -251,9 +259,6 @@ const _do = { //magnitude, angle, unit, add, subtract, scale, rotate
     return Math.atan2(vec.y, vec.x);
   }
 };
-
-
-//******* Internal Functions *******//
 
 function parseArgs(x, y) {
   if(typeof x === "object") {
