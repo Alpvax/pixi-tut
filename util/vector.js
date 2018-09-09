@@ -276,5 +276,6 @@ function parseArgs(x, y) {
 
 function newVec(vec, ...args) {
   args = args.length ? args : [vec];
-  return new (vec[Symbol.species] || vec.constructor)(...args);
+  let factory = vec[Symbol.species] || (vec instanceof Vector ? vec.constructor : ImmutableVector);
+  return factory(...args);
 }
