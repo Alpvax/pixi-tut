@@ -56,9 +56,9 @@ describe("Vector", function() {
   describe("instanceof", function() {
     function runTests(v, isV, isI, isM) {
       let name = v.constructor.name;
-      it(`${name + (isV ? "" : " not")} instanceof Vector`,           function() {assert["is" + (isV ? "True" : "False")](v instanceof Vector); });
-      it(`${name + (isI ? "" : " not")} instanceof ImmutableVector`,  function() {assert["is" + (isI ? "True" : "False")](v instanceof ImmutableVector); });
-      it(`${name + (isM ? "" : " not")} instanceof MutableVector`,    function() {assert["is" + (isM ? "True" : "False")](v instanceof MutableVector); });
+      it(`${name + (isV ? "" : " not")} instanceof Vector`,           function() {assert[(isV ? "i" : "notI") + "nstanceOf"](v, Vector); });
+      it(`${name + (isI ? "" : " not")} instanceof ImmutableVector`,  function() {assert[(isI ? "i" : "notI") + "nstanceOf"](v, ImmutableVector); });
+      it(`${name + (isM ? "" : " not")} instanceof MutableVector`,    function() {assert[(isM ? "i" : "notI") + "nstanceOf"](v, MutableVector); });
     }
     let x = 3, y = 4;
     runTests(new Vector(x, y), true, true, false);
@@ -69,16 +69,21 @@ describe("Vector", function() {
 
   describe("mutablility", function() {
     function testMutability(v, prop, val, result) {
-      it(`${v}.${prop} = ${val} should ${result ? `equal ${result}` : "throw error"}`, function() {
-        let vec = Vector.copy(v);
-        let fun = () => vec[prop] = val;
-        if(result) {
-          fun();
+      let vec = Vector.copy(v);
+      let fun = () => vec[prop] = val;
+      if(result) {
+        fun();
+        it(`${v}.${prop} = ${val} should equal ${result}`, function() {
           assert.isTrue(Vector.equals(vec, result));
-        } else {
+        });
+      } else {
+        it(`${v}.${prop} = ${val} should throw an error`, function() {
           assert.throws(fun);
-        }
-      });
+        });
+        it(`${v}.${prop} = ${val} should remain unchanged`, function() {
+          assert.isTrue(Vector.equals(vec, v));
+        });
+      }
     }
     let vi = ImmutableVector(3, 4);
     let vm = MutableVector(3, 4);
@@ -96,6 +101,13 @@ describe("Vector", function() {
   });
 
   describe("Functions", function() {
+    let x = 3, y = 4;
+    let vi = new Vector.Immutable(x, y);
+    it(`${vi}.add({2,3}).equals({5, 7})`, function() {
+      let res = Vector(5, 7);
+      assert.isTrue()
+    })
+    let vm = new Vector.Mutable(x, y);
     function logFuncCall(num, v, name, ...args) {
       v = Vector.copy(v);
       let funStr = `${name}(${args.map((a) => JSON.stringify(a)).join(",")}): `;
