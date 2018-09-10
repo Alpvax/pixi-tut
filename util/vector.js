@@ -99,6 +99,9 @@ const sharedFuncs = {
   },
   equals(vec, precision) {
     return Vector.equals(this, vec, precision);
+  },
+  toString() {
+    return `${this.constructor.name}{x: ${this.x}, y: ${this.y}}`;
   }
 };
 
@@ -181,7 +184,7 @@ function equals(vec1, vec2, precision) {
     return true;
   }
   if(isNaN(precision)) {
-    precision = 0;
+    precision = 1e-15; //Default precision to fix sin/cos Math rounding errors
   }
   precision += Number.EPSILON;
   return Math.abs(vec1.x - vec2.x) <= precision && Math.abs(vec1.y - vec2.y) <= precision;

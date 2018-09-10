@@ -2,7 +2,7 @@ import VDefault, * as VAll from "../../util/vector.js";
 import {Vector, ImmutableVector, MutableVector} from "../../util/vector.js";
 export default {};
 
-describe("Vector", () => {
+describe("Vector", function() {
   describe("exports", function() {
     it("default export is Vector", function() {
       assert.equal(VDefault, Vector);
@@ -36,19 +36,19 @@ describe("Vector", () => {
       });
       if(flag) {
         it(`${name}.copy is ${name}.equal`, function() {
-          assert(v.equals(v.copy()));
+          assert.isTrue(v.equals(v.copy()));
         });
       }
       if(flag) {
         it(`Vector.copy(${name}) is ${name}.equal`, function() {
-          assert(v.equals(Vector.copy(v)));
+          assert.isTrue(v.equals(Vector.copy(v)));
         });
         it(`${name}.copy is Vector.equal`, function() {
-          assert(Vector.equals(v, v.copy()));
+          assert.isTrue(Vector.equals(v, v.copy()));
         });
       }
       it(`Vector.copy(${name}) is Vector.equal`, function() {
-        assert(Vector.equals(v, Vector.copy(v)));
+        assert.isTrue(Vector.equals(v, Vector.copy(v)));
       });
     });
   });
@@ -56,9 +56,9 @@ describe("Vector", () => {
   describe("instanceof", function() {
     function runTests(v, isV, isI, isM) {
       let name = v.constructor.name;
-      it(`${name + (isV ? "" : " not")} instanceof Vector`,           () => assert["is" + (isV ? "True" : "False")](v instanceof Vector));
-      it(`${name + (isI ? "" : " not")} instanceof ImmutableVector`,  () => assert["is" + (isI ? "True" : "False")](v instanceof ImmutableVector));
-      it(`${name + (isM ? "" : " not")} instanceof MutableVector`,    () => assert["is" + (isM ? "True" : "False")](v instanceof MutableVector));
+      it(`${name + (isV ? "" : " not")} instanceof Vector`,           function() {assert["is" + (isV ? "True" : "False")](v instanceof Vector); });
+      it(`${name + (isI ? "" : " not")} instanceof ImmutableVector`,  function() {assert["is" + (isI ? "True" : "False")](v instanceof ImmutableVector); });
+      it(`${name + (isM ? "" : " not")} instanceof MutableVector`,    function() {assert["is" + (isM ? "True" : "False")](v instanceof MutableVector); });
     }
     let x = 3, y = 4;
     runTests(new Vector(x, y), true, true, false);
@@ -67,36 +67,35 @@ describe("Vector", () => {
     runTests({x, y}, false, false, false);
   });
 
-  describe("mutablility", () => {
-    function testMutability(v, prop, val, error) {
-      describe(`Set ${v.constructor.name}.${prop} = ${val}`, () => {
-        it(`should ${error ? "fail" : "change"}`, () => {
-          let vec = Vector.copy(v);
-          let fun = () => vec[prop] = val;
-          if(error) {
-            assert.throws(fun);
-          } else {
-            assert.changes(fun, vec, prop);
-          }
-        });
+  describe("mutablility", function() {
+    function testMutability(v, prop, val, result) {
+      it(`${v}.${prop} = ${val} should ${result ? `equal ${result}` : "throw error"}`, function() {
+        let vec = Vector.copy(v);
+        let fun = () => vec[prop] = val;
+        if(result) {
+          fun();
+          assert.isTrue(Vector.equals(vec, result));
+        } else {
+          assert.throws(fun);
+        }
       });
     }
     let vi = ImmutableVector(3, 4);
     let vm = MutableVector(3, 4);
     Object.entries({
-      x: 2,
-      y: 6,
-      angle: Math.PI,
-      magnitude: 10
-    }).forEach(([k, val]) => {
-      testMutability(vi, k, val, true);
-      testMutability(vm, k, val, false);
+      x: [2, Vector({x: 2, y: 4})],
+      y: [6, Vector({x: 3, y: 6})],
+      angle: [Math.PI, Vector({x: -5, y: 0})],
+      magnitude: [10, Vector({x: 6, y: 8})],
+    }).forEach(([k, [val, res]]) => {
+      testMutability(vi, k, val);
+      testMutability(vm, k, val, res);
     });
-    testMutability(vi, "magSquared", 9, true);
-    testMutability(vm, "magSquared", 9, true);
+    testMutability(vi, "magSquared", 9);
+    testMutability(vm, "magSquared", 9);
   });
 
-  describe("Functions", () => {
+  describe("Functions", function() {
     function logFuncCall(num, v, name, ...args) {
       v = Vector.copy(v);
       let funStr = `${name}(${args.map((a) => JSON.stringify(a)).join(",")}): `;
@@ -112,7 +111,7 @@ describe("Vector", () => {
     }
     function runTest(v, name, ...args) {
       v = Vector.copy(v);
-      describe(`${name}(${args.map((a) => JSON.stringify(a)).join(",")})`, () => {
+      describe(`${name}(${args.map((a) => JSON.stringify(a)).join(",")})`, function() {
         //it("")
       });
     }
