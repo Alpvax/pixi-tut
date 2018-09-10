@@ -85,7 +85,7 @@ Vector.Immutable = ImmutableVector;
 Vector.Mutable = MutableVector;
 export default Vector;
 
-[copy, equals, magnitude, angle, unit, add, subtract, inverted, scale, rotate].forEach((func) => Vector[func.name] = func);
+[copy, equal, magnitude, angle, unit, add, subtract, inverted, scale, rotate].forEach((func) => Vector[func.name] = func);
 const sharedFuncs = {
   //Non-modifying
   inverted() {
@@ -98,7 +98,7 @@ const sharedFuncs = {
     return Vector.copy(this);
   },
   equals(vec, precision) {
-    return Vector.equals(this, vec, precision);
+    return Vector.equal(this, vec, precision);
   },
   toString() {
     return `${this.constructor.name}{x: ${this.x}, y: ${this.y}}`;
@@ -179,7 +179,7 @@ function angle(vec) {
 function unit(vec) {
   return newVec(_do.unit(vec));
 }
-function equals(vec1, vec2, precision) {
+function equal(vec1, vec2, precision) {
   if(vec1 === vec2) {
     return true;
   }
