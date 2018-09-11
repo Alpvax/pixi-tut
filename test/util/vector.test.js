@@ -234,141 +234,274 @@ describe("Vector static functions (other than equal)", function() {
   });
 });
 
-
-/*TODO: refactor tests to describe each Vector type
-describe("copying", function() {
-  makeTestVectors().forEach((v) => {
-    let name = v.constructor.name;
-    let flag = /Vector/g.test(name);
-    if(flag) {
-      it(`${name}.copy is not original`, function() {
-        assert.notEqual(v, v.copy());
-      });
-    }
-    it(`Vector.copy(${name}) is not original`, function() {
-      assert.notEqual(v, Vector.copy(v));
+describe("ImmutableVector", function() {
+  describe("equals()", function() {
+    it("Should return true if both x and y values are equivalent", function() {
+      assert.isTrue(ImmutableVector(3, 4).equals({x: 3, y: 4}));
     });
-    if(flag) {
-      it(`${name}.copy is ${name}.equal`, function() {
-        assert.isTrue(v.equals(v.copy()));
-      });
-    }
-    if(flag) {
-      it(`Vector.copy(${name}) is ${name}.equal`, function() {
-        assert.isTrue(v.equals(Vector.copy(v)));
-      });
-      it(`${name}.copy is Vector.equal`, function() {
-        assert.isTrue(Vector.equals(v, v.copy()));
-      });
-    }
-    it(`Vector.copy(${name}) is Vector.equal`, function() {
-      assert.isTrue(Vector.equals(v, Vector.copy(v)));
+    it("Should return false otherwise", function() {
+      assert.isFalse(ImmutableVector(3, 4).equals({x: 3, y: 3}));
+    });
+  });
+  describe("toString()", function() {
+    it("Should return \"ImmutableVector{x, y}\"", function() {
+      assert.strictEqual(ImmutableVector(3, 4).toString(), "ImmutableVector{x: 3, y: 4}");
+    });
+  });
+  describe("copy()", function() {
+    let v = ImmutableVector(3,4);
+    let c = v.copy();
+    it("Should not return the same instance (Should it really!!?)", function() {
+      assert.notStrictEqual(v, c);
+    });
+    it("Should return an equal instance", function() {
+      assert.deepEqual(v, c);
+    });
+    it("Should return an ImmutableVector", function() {
+      assert.instanceOf(c, ImmutableVector);
+    });
+  });
+  describe("inverted()", function() {
+    let v = ImmutableVector(3, 4);
+    let c = v.copy();
+    it("Should return a new vector", function() {
+      assert.notStrictEqual(v, ImmutableVector(-3, -4).inverted());
+    });
+    it("Should return the inverse (x and y made negative)", function() {
+      assert.deepEqual(v, ImmutableVector(-3, -4).inverted());
+    });
+    it("Should not have affected the original vector", function() {
+      assert.deepEqual(v, c);
+    });
+  });
+  describe("invert()", function() {
+    let v = ImmutableVector(3, 4);
+    it("Should throw an error (cannot invert an immutable vector)", function() {
+      assert.throws(() => v.invert());
+    });
+  });
+  describe("unit()", function() {
+    let v = ImmutableVector(3, 4);
+    let vu = v.unit();
+    it("Should return a new vector", function() {
+      assert.notStrictEqual(v, vu);
+    });
+    it("Should return a vector with magnitude 1", function() {
+      assert.strictEqual(vu.magnitude, 1);
+    });
+    it("Should have the same angle as before", function() {
+      assert.approximately(vu.angle, v.angle, Number.EPSILON);
+    });
+  });
+  describe("magnitude", function() {
+    let v = ImmutableVector(3, 4);
+    it("Should retrieve the magnitude", function() {
+      assert.strictEqual(v.magnitude, 5);
+    });
+    it("If used as a setter, should throw an error", function() {
+      assert.throws(() => v.magnitude = 10);
+    });
+  });
+  describe("angle", function() {
+    let v = ImmutableVector(3, 4);
+    it("Should retrieve the angle", function() {
+      assert.strictEqual(v.angle, Math.atan2(4, 3));
+    });
+    it("If used as a setter, should throw an error", function() {
+      assert.throws(() => v.angle = Math.PI);
+    });
+  });
+  describe("add", function() {
+    let v = ImmutableVector(3, 4);
+    let v2 = v.copy();
+    let va = v.add({x: 1, y: 2});
+    it("Should return a new vector", function() {
+      assert.notStrictEqual(v, va);
+    });
+    it("should return the sum of 2 vectors", function() {
+      assert.isTrue(va.equals({x: 4, y: 6}));
+    });
+    it("Should not effect the original", function() {
+      assert.deepEqual(v, v2);
+    });
+  });
+  describe("subtract", function() {
+    let v = ImmutableVector(3, 4);
+    let v2 = v.copy();
+    let vs = v.subtract({x: 1, y: 4});
+    it("Should return a new vector", function() {
+      assert.notStrictEqual(v, vs);
+    });
+    it("should return 2 vectors subtracted", function() {
+      assert.isTrue(vs.equals({x: 2, y: 0}));
+    });
+    it("Should not effect the original", function() {
+      assert.deepEqual(v, v2);
+    });
+  });
+  describe("scale", function() {
+    let v = ImmutableVector(3, 4);
+    let v2 = v.copy();
+    let v1 = v.scale(2);
+    it("Should return a new vector", function() {
+      assert.notStrictEqual(v, v1);
+    });
+    it("with the magnitude scaled", function() {
+      assert.isTrue(v1.equals({x: 6, y: 8}));
+    });
+    it("But the same angle", function() {
+      assert.approximately(v1.angle, v2.angle, Number.EPSILON);
+    });
+    it("Should not effect the original", function() {
+      assert.deepEqual(v, v2);
+    });
+  });
+  describe("rotate", function() {
+    let v = ImmutableVector(0, 1);
+    let v2 = Vector.copy(v);
+    let v1 = Vector.rotate(v, Math.PI / 2);
+    it("Should return a new vector", function() {
+      assert.notStrictEqual(v, v1);
+    });
+    it("rotated around the origin", function() {
+      assert.isTrue(v1.equals({x: -1, y: 0}));
+    });
+    it("But the same magnitude", function() {
+      assert.approximately(v1.magnitude, v2.magnitude, Number.EPSILON);
+    });
+    it("Should not effect the original", function() {
+      assert.deepEqual(v, v2);
     });
   });
 });
 
-describe("instanceof", function() {
-  function runTests(v, isV, isI, isM) {
-    let name = v.constructor.name;
-    it(`${name + (isV ? "" : " not")} instanceof Vector`,           function() {assert[(isV ? "i" : "notI") + "nstanceOf"](v, Vector); });
-    it(`${name + (isI ? "" : " not")} instanceof ImmutableVector`,  function() {assert[(isI ? "i" : "notI") + "nstanceOf"](v, ImmutableVector); });
-    it(`${name + (isM ? "" : " not")} instanceof MutableVector`,    function() {assert[(isM ? "i" : "notI") + "nstanceOf"](v, MutableVector); });
-  }
-  let x = 3, y = 4;
-  runTests(new Vector(x, y), true, true, false);
-  runTests(new Vector.Immutable(x, y), true, true, false);
-  runTests(new Vector.Mutable(x, y), true, false, true);
-  runTests({x, y}, false, false, false);
-});
-
-describe("mutablility", function() {
-  function testMutability(v, prop, val, result) {
-    let vec = Vector.copy(v);
-    let fun = () => vec[prop] = val;
-    if(result) {
-      fun();
-      it(`${v}.${prop} = ${val} should equal ${result}`, function() {
-        assert.isTrue(Vector.equals(vec, result));
-      });
-    } else {
-      it(`${v}.${prop} = ${val} should throw an error`, function() {
-        assert.throws(fun);
-      });
-      it(`${v}.${prop} = ${val} should remain unchanged`, function() {
-        assert.isTrue(Vector.equals(vec, v));
-      });
-    }
-  }
-  let vi = ImmutableVector(3, 4);
-  let vm = MutableVector(3, 4);
-  Object.entries({
-    x: [2, Vector({x: 2, y: 4})],
-    y: [6, Vector({x: 3, y: 6})],
-    angle: [Math.PI, Vector({x: -5, y: 0})],
-    magnitude: [10, Vector({x: 6, y: 8})],
-  }).forEach(([k, [val, res]]) => {
-    testMutability(vi, k, val);
-    testMutability(vm, k, val, res);
-  });
-  testMutability(vi, "magSquared", 9);
-  testMutability(vm, "magSquared", 9);
-});
-
-describe("Functions", function() {
-  let x = 3, y = 4;
-  let vi = new Vector.Immutable(x, y);
-  it(`${vi}.add({2,3}).equals({5, 7})`, function() {
-    let res = Vector(5, 7);
-    assert.isTrue()
-  })
-  let vm = new Vector.Mutable(x, y);
-  function logFuncCall(num, v, name, ...args) {
-    v = Vector.copy(v);
-    let funStr = `${name}(${args.map((a) => JSON.stringify(a)).join(",")}): `;
-    let strStart = `Test ${(num + 1).toString().padStart(2)}:\t`;
-    try {
-      console.log(strStart + funStr, v[name](...args));
-    } catch(e) {
-      console.warn(e);
-    }
-    if(name !== "invert") {
-      console.log(strStart + "Vector." + funStr, Vector[name](v, ...args));
-    }
-  }
-  function runTest(v, name, ...args) {
-    v = Vector.copy(v);
-    describe(`${name}(${args.map((a) => JSON.stringify(a)).join(",")})`, function() {
-      //it("")
+describe("MutableVector", function() {
+  describe("equals()", function() {
+    it("Should return true if both x and y values are equivalent", function() {
+      assert.isTrue(MutableVector(3, 4).equals({x: 3, y: 4}));
     });
-  }
-  makeTestVectors().forEach((v) => {
-    let tests = {
-      add: [[{x: 2, y: 3}]],
-      subtract: [[{x: 5, y: 7}]],
-      invert: [],
-      inverted: [],
-      copy: [],
-      scale: [[2]],
-      rotate: [[Math.PI]],
-      unit: [],
-      equals: [[v]],
-      equals: [[{x: 3, y: 4}], [{x: 4, y: 3}], [{x: 3.1, y: 4.1}], [{x: 3.1, y: 4.1}, 0.1]],
-    };
-    Object.entries(tests).forEach(([k, tests]) => {
-      if(tests.length < 1) {
-        runTest(v, k);
-      } else {
-        tests.forEach((args) => runTest(v, k, ...args));
-      }
+    it("Should return false otherwise", function() {
+      assert.isFalse(MutableVector(3, 4).equals({x: 3, y: 3}));
     });
   });
+  describe("toString()", function() {
+    it("Should return \"MutableVector{x, y}\"", function() {
+      assert.strictEqual(MutableVector(3, 4).toString(), "MutableVector{x: 3, y: 4}");
+    });
+  });
+  describe("copy()", function() {
+    let v = MutableVector(3,4);
+    let c = v.copy();
+    it("Should not return the same instance", function() {
+      assert.notStrictEqual(v, c);
+    });
+    it("Should return an equal instance", function() {
+      assert.deepEqual(v, c);
+    });
+    it("Should return a MutableVector", function() {
+      assert.instanceOf(c, MutableVector);
+    });
+  });
+  describe("inverted()", function() {
+    let v = MutableVector(3, 4);
+    let c = v.copy();
+    it("Should return a new vector", function() {
+      assert.notStrictEqual(v, MutableVector(-3, -4).inverted());
+    });
+    it("Should return the inverse (x and y made negative)", function() {
+      assert.deepEqual(v, MutableVector(-3, -4).inverted());
+    });
+    it("Should not have affected the original vector", function() {
+      assert.deepEqual(v, c);
+    });
+  });
+  describe("invert()", function() {
+    let v = MutableVector(3, 4);
+    it("Should reverse the existing vector", function() {
+      assert.isTrue(v.invert().equals({x: -3, y: -4}));
+    });
+  });
+  describe("unit()", function() {
+    let v = MutableVector(3, 4);
+    let vu = v.unit();
+    it("Should return a new vector", function() {
+      assert.notStrictEqual(v, vu);
+    });
+    it("Should return a vector with magnitude 1", function() {
+      assert.strictEqual(vu.magnitude, 1);
+    });
+    it("Should have the same angle as before", function() {
+      assert.approximately(vu.angle, v.angle, Number.EPSILON);
+    });
+  });
+  describe("magnitude", function() {
+    let v = MutableVector(3, 4);
+    let v2 = v.copy();
+    v2.magnitude = 10;
+    it("Should retrieve the magnitude", function() {
+      assert.strictEqual(v.magnitude, 5);
+    });
+    it("If used as a setter, should set the original magnitude", function() {
+      assert.strictEqual(v2.magnitude, 10);
+    });
+  });
+  describe("angle", function() {
+    let v = MutableVector(3, 4);
+    let v2 = v.copy();
+    v2.angle = Math.PI;
+    it("Should retrieve the angle", function() {
+      assert.strictEqual(v.angle, Math.atan2(4, 3));
+    });
+    it("If used as a setter, should set the original angle", function() {
+      assert.strictEqual(v2.angle, Math.PI);
+    });
+  });
+  describe("add()", function() {
+    let v = MutableVector(3, 4);
+    let va = v.add({x: 1, y: 2});
+    it("Should return the same vector", function() {
+      assert.strictEqual(v, va);
+    });
+    it("should return the sum of 2 vectors", function() {
+      assert.isTrue(va.equals({x: 4, y: 6}));
+    });
+  });
+  describe("subtract()", function() {
+    let v = MutableVector(3, 4);
+    let vs = v.subtract({x: 1, y: 4});
+    it("Should return the same vector", function() {
+      assert.strictEqual(v, vs);
+    });
+    it("should return 2 vectors subtracted", function() {
+      assert.isTrue(vs.equals({x: 2, y: 0}));
+    });
+  });
+  describe("scale()", function() {
+    let v = MutableVector(3, 4);
+    let v2 = v.copy();
+    let v1 = v.scale(2);
+    it("Should return the same vector", function() {
+      assert.strictEqual(v, v1);
+    });
+    it("with the magnitude scaled", function() {
+      assert.isTrue(v1.equals({x: 6, y: 8}));
+    });
+    it("But the same angle", function() {
+      assert.approximately(v1.angle, v2.angle, Number.EPSILON);
+    });
+  });
+  describe("rotate()", function() {
+    let v = MutableVector(0, 1);
+    let v2 = v.copy();
+    let v1 = v.rotate(Math.PI / 2);
+    it("Should return the same vector", function() {
+      assert.strictEqual(v, v1);
+    });
+    it("rotated around the origin", function() {
+      assert.isTrue(v1.equals({x: -1, y: 0}));
+    });
+    it("But the same magnitude", function() {
+      assert.approximately(v1.magnitude, v2.magnitude, Number.EPSILON);
+    });
+  });
 });
-
-function makeTestVectors(x = 3, y = 4) {
-  return [
-    new Vector(x, y),
-    new Vector.Immutable(x, y),
-    new Vector.Mutable(x, y),
-    {x, y}
-  ];
-}*/
