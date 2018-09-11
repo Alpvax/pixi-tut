@@ -6,8 +6,9 @@ describe("Vector exports", function() {
   it("default is Vector", function() {
     assert.equal(VDefault, Vector);
   });
+  let exceptions = ["default", "Vectors"];
   Object.entries(VAll).forEach(([k, v]) => {
-    if(k !== "default") {
+    if(!(exceptions.includes(k))) {
       it(`[*].${k} is ${k}`, function() {
         assert.equal(v, eval(k));
       });
@@ -88,32 +89,66 @@ describe("Vector equality", function() {
   let vm2 = MutableVector(3, 4);
   let ob1 = {x: 3, y: 4};
   let ob2 = {x: 3, y: 4};
-  it("ImmutableVector = ImmutableVector", function() {
+  //Vector.equal(ImmutableVector, ?)
+  it("Vector.equal(ImmutableVector, ImmutableVector)", function() {
     assert.isTrue(Vector.equal(vi1, vi2));
   });
-  it("ImmutableVector = MutableVector", function() {
+  it("Vector.equal(ImmutableVector, MutableVector)", function() {
     assert.isTrue(Vector.equal(vi1, vm2));
   });
-  it("ImmutableVector = Object", function() {
+  it("Vector.equal(ImmutableVector, Object)", function() {
     assert.isTrue(Vector.equal(vi1, ob2));
   });
-  it("MutableVector = ImmutableVector", function() {
+  //Immutable.equals(?)
+  it("ImmutableVector.equals(ImmutableVector)", function() {
+    assert.isTrue(vi1.equals(vi2));
+  });
+  it("ImmutableVector.equals(MutableVector)", function() {
+    assert.isTrue(vi1.equals(vm2));
+  });
+  it("ImmutableVector.equals(Object)", function() {
+    assert.isTrue(vi1.equals(ob2));
+  });
+  //Vector.equal(MutableVector, ?)
+  it("Vector.equal(MutableVector, ImmutableVector)", function() {
     assert.isTrue(Vector.equal(vm1, vi2));
   });
-  it("MutableVector = MutableVector", function() {
+  it("Vector.equal(MutableVector, MutableVector)", function() {
     assert.isTrue(Vector.equal(vm1, vm2));
   });
-  it("MutableVector = Object", function() {
+  it("Vector.equal(MutableVector, Object)", function() {
     assert.isTrue(Vector.equal(vm1, ob2));
   });
-  it("Object = ImmutableVector", function() {
+  //MutableVector.equals(?)
+  it("MutableVector.equals(ImmutableVector)", function() {
+    assert.isTrue(vm1.equals(vi2));
+  });
+  it("MutableVector.equals(MutableVector)", function() {
+    assert.isTrue(vm1.equals(vm2));
+  });
+  it("MutableVector.equals(Object)", function() {
+    assert.isTrue(vm1.equals(ob2));
+  });
+  //Vector.equal(Object, ?)
+  it("Vector.equal(Object, ImmutableVector)", function() {
     assert.isTrue(Vector.equal(ob1, vi2));
   });
-  it("Object = MutableVector", function() {
+  it("Vector.equal(Object, MutableVector)", function() {
     assert.isTrue(Vector.equal(ob1, vm2));
   });
-  it("Object = Object", function() {
+  it("Vector.equal(Object, Object)", function() {
     assert.isTrue(Vector.equal(ob1, ob2));
+  });
+  //Non-equal tests
+  let vdiff = {x: 8, y: 6};
+  it("Vector.equal with unequal parameters is not true", function() {
+    assert.isFalse(Vector.equal(ob1, vdiff));
+  });
+  it("ImmutableVector.equals with unequal parameters is not true", function() {
+    assert.isFalse(vi1.equals(vdiff));
+  });
+  it("ImmutableVector.equals with unequal parameters is not true", function() {
+    assert.isFalse(vm1.equals(vdiff));
   });
 });
 

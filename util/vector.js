@@ -85,7 +85,15 @@ Vector.Immutable = ImmutableVector;
 Vector.Mutable = MutableVector;
 export default Vector;
 
+export const Vectors = {
+  equal: equal,
+  sum: add,
+  add: add
+};
+
 [copy, equal, magnitude, angle, unit, add, subtract, inverted, scale, rotate].forEach((func) => Vector[func.name] = func);
+Vector.equals = equal;//Add equals() alias
+Vector.sum = add;//Add sum() alias
 const sharedFuncs = {
   //Non-modifying
   inverted() {
