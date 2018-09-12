@@ -8,6 +8,7 @@ export default function CachedValue(calculate) {
       get() {
         if(dirty) {
           val = calculate();
+          dirty = false;
         }
         return val;
       }
