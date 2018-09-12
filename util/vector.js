@@ -1,5 +1,8 @@
 import CachedValue from "./cachedValue.js";
 
+/**@type {ImmutableVector} */
+export const ZERO = ImmutableVector(0, 0);
+
 export function MutableVector(x, y) {
   if(!(this instanceof MutableVector)) {
     return new MutableVector(x, y);
@@ -10,7 +13,9 @@ export function MutableVector(x, y) {
     y = yv;
     magSquared.invalidate();
     magnitude.invalidate();
-    angle.invalidate();
+    if(x !== 0 || y !== 0) {
+      angle.invalidate();
+    }
   }
   function setAM(angle, magnitude) {
     setXY(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
@@ -83,6 +88,7 @@ Object.defineProperty(Vector, Symbol.hasInstance, {
 });
 Vector.Immutable = ImmutableVector;
 Vector.Mutable = MutableVector;
+Vector.ZERO = ZERO;
 export default Vector;
 
 export const Vectors = {
@@ -93,6 +99,7 @@ export const Vectors = {
 
 [copy, equal, magnitude, angle, unit, add, subtract, inverted, scale, rotate].forEach((func) => Vector[func.name] = func);
 Vector.equals = equal;//Add equals() alias
+Vector.clone = copy;
 Vector.sum = add;//Add sum() alias
 const sharedFuncs = {
   //Non-modifying
@@ -105,11 +112,17 @@ const sharedFuncs = {
   copy() {
     return Vector.copy(this);
   },
+  clone() {//copy alias
+    return Vector.copy(this);
+  },
   equals(vec, precision) {
     return Vector.equal(this, vec, precision);
   },
   toString() {
     return `${this.constructor.name}{x: ${this.x}, y: ${this.y}}`;
+  },
+  get length() {
+    return this.magnitude;
   }
 };
 
@@ -185,7 +198,7 @@ function angle(vec) {
   return _do.angle(vec);
 }
 function unit(vec) {
-  return newVec(_do.unit(vec));
+  return newVec(vec, _do.unit(vec));
 }
 function equal(vec1, vec2, precision) {
   if(vec1 === vec2) {
@@ -252,6 +265,9 @@ const _do = { //magnitude, angle, unit, add, subtract, scale, rotate
   },
   unit(vec) {
     let mag = _do.magnitude(vec);
+    if(mag === 0) {
+      throw new Error("Cannot get a unit vector from 0-length vector");
+    }
     return {
       x: vec.x / mag,
       y: vec.y / mag
@@ -286,7 +302,12 @@ function parseArgs(x, y) {
 }
 
 function newVec(vec, ...args) {
-  args = args.length ? args : [vec];
+  if(!args.length) {
+    if(vec instanceof ImmutableVector) { //Immutable Vectors do not need to be copied
+      return vec;
+    }
+    args = [vec];
+  }
   let factory = vec[Symbol.species] || (vec instanceof Vector ? vec.constructor : ImmutableVector);
   return factory(...args);
 }

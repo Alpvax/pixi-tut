@@ -1,5 +1,5 @@
 import VDefault, * as VAll from "../../util/vector.js";
-import {Vector, ImmutableVector, MutableVector} from "../../util/vector.js";
+import {Vector, ImmutableVector, MutableVector, ZERO} from "../../util/vector.js";
 export default {};
 
 describe("Vector exports", function() {
@@ -154,16 +154,20 @@ describe("Vector equality", function() {
 
 describe("Vector static functions (other than equal)", function() {
   describe("Vector.copy", function() {
-    let v = Vector(3,4);
-    let c = Vector.copy(v);
+    let vi = ImmutableVector(3,4);
+    let vm = MutableVector(3,4);
+    let c = Vector.copy(vm);
+    it("Should return the same instance for ImmutableVectors", function() {
+      assert.strictEqual(vi, Vector.copy(vi));
+    });
     it("Should not return the same instance", function() {
-      assert.notEqual(v, c);
+      assert.notEqual(vm, c);
     });
     it("Should return an equal instance", function() {
-      assert.deepEqual(v, c);
+      assert.deepEqual(vm, c);
     });
     it("Should return the same type", function() {
-      assert.strictEqual(v.constructor.name, c.constructor.name);
+      assert.strictEqual(vm.constructor.name, c.constructor.name);
     });
   });
   describe("Vector.inverted", function() {
@@ -286,8 +290,8 @@ describe("ImmutableVector", function() {
   describe("copy()", function() {
     let v = ImmutableVector(3,4);
     let c = v.copy();
-    it("Should not return the same instance (Should it really!!?)", function() {
-      assert.notStrictEqual(v, c);
+    it("Should return the same instance", function() {
+      assert.strictEqual(v, c);
     });
     it("Should return an equal instance", function() {
       assert.deepEqual(v, c);
@@ -537,6 +541,31 @@ describe("MutableVector", function() {
     });
     it("But the same magnitude", function() {
       assert.approximately(v1.magnitude, v2.magnitude, Number.EPSILON);
+    });
+  });
+});
+
+//TODO: magSquared tests
+
+describe("{0,0}", function() {
+  let v0 = {x: 0, y: 0};
+  it("equals Vector.ZERO", function() {
+    assert.isTrue(Vector.equals(v0, ZERO));
+  });
+  describe(".unit()", function() {
+    it("throws an error", function() {
+      assert.throws(() => Vector.unit(v0));
+    });
+  });
+  describe("MutableVector.magnitude = 0", function() {
+    let m = MutableVector(1,2);
+    let c = m.copy();
+    m.magnitude = 0;
+    it("makes the vector equal Vector.ZERO", function() {
+      assert.isTrue(Vector.equals(m, ZERO));
+    });
+    it("Still has the original (no longer valid) angle", function() {
+      assert.strictEqual(m.angle, c.angle);
     });
   });
 });
