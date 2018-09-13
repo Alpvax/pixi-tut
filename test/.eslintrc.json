@@ -3,6 +3,7 @@
     "describe": false,
     "it": false,
     "chai": false,
+    "expect": false,
     "assert": false
   }
 }
