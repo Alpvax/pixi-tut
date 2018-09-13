@@ -31,6 +31,14 @@
       "error",
       "always"
     ],
+    "space-infix-ops": "error",
+    "space-unary-ops": [
+      "error",
+      {
+        "words": true,
+        "nonwords": false
+      }
+    ],
     "no-console": "off",
     "no-undef": "error",
     "no-unused-vars": [
