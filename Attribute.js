@@ -82,7 +82,8 @@ export default class Attribute {
     }
     let key = modifier.key;
     if(this.modifiers.has(key)) {
-      throw `Attempted to add modifier ${modifier} with the same key (${key}) as an existing modifier: ${this.modifiers.get(key)}.`;
+      throw `Attempted to add modifier ${modifier} with the same key (${key}) as an existing` +
+        ` modifier: ${this.modifiers.get(key)}.`;
     }
     this.modifiers.set(key, modifier);
     this.__markDirty();

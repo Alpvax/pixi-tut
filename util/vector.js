@@ -99,7 +99,8 @@ export const Vectors = {
   add: add
 };
 
-[copy, equal, magnitude, angle, unit, add, subtract, inverted, scale, rotate].forEach((func) => Vector[func.name] = func);
+[copy, equal, magnitude, angle, unit, add, subtract, inverted, scale, rotate]
+  .forEach((func) => Vector[func.name] = func);
 Vector.equals = equal;//Add equals() alias
 Vector.clone = copy;
 Vector.sum = add;//Add sum() alias
@@ -161,19 +162,23 @@ Object.assign(MutableVector.prototype, {
 }, sharedFuncs);
 Object.assign(ImmutableVector.prototype, {
   add(...others) {
-    console.debug("Creating new Vector instance while calling `ImmutableVector.add`\nStacktrace: " + new Error().stack);
+    console.debug("Creating new Vector instance while calling `ImmutableVector.add`\n" +
+      "Stacktrace: " + new Error().stack);
     return add(this, ...others);
   },
   subtract(...others) {
-    console.debug("Creating new Vector instance while calling `ImmutableVector.subtract`\nStacktrace: " + new Error().stack);
+    console.debug("Creating new Vector instance while calling `ImmutableVector.subtract`\n" +
+      "Stacktrace: " + new Error().stack);
     return subtract(this, ...others);
   },
   scale(amount) {
-    console.debug("Creating new Vector instance while calling `ImmutableVector.scale`\nStacktrace: " + new Error().stack);
+    console.debug("Creating new Vector instance while calling `ImmutableVector.scale`\n" +
+      "Stacktrace: " + new Error().stack);
     return scale(this, amount);
   },
   rotate(amount) {
-    console.debug("Creating new Vector instance while calling `ImmutableVector.rotate`\nStacktrace: " + new Error().stack);
+    console.debug("Creating new Vector instance while calling `ImmutableVector.rotate`\n" +
+      "Stacktrace: " + new Error().stack);
     return rotate(this, amount);
   },
   invert() {
