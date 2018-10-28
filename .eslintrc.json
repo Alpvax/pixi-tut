@@ -75,6 +75,10 @@
         "ignoreStrings": false,
         "ignoreTemplateLiteral": false
       }
+    ],
+    "spaced-line-comment": [
+      "error",
+      "always"
     ]
   }
 }
