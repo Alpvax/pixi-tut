@@ -81,6 +81,8 @@ export function ImmutableVector(x, y) {
 };
 
 export const Vector = function(x, y) {
+  console.warn("Using the Vector constructor defaults to immutable vectors, using ImmutableVector" +
+    " is recommended to avoid ambiguity.");
   return ImmutableVector(x, y);
 };
 Object.defineProperty(Vector, Symbol.hasInstance, {
