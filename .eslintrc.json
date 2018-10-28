@@ -65,6 +65,16 @@
     "eol-last": [
       "error",
       "always"
+    ],
+    "max-len": [
+      "warn",
+      {
+        "code": 100,
+        "tabWidth": 2,
+        "ignoreComments": false,
+        "ignoreStrings": false,
+        "ignoreTemplateLiteral": false
+      }
     ]
   }
 }
