@@ -1,8 +1,8 @@
 "use strict";
 
-import Entity/*, {EntityFactory}*/ from "./Entity.js";
+import Entity /*, {EntityFactory}*/ from "./Entity.js";
 import SpiderSpawner from "./SpiderSpawner.js";
-import {InputAction, Keybind} from "./Input.js";
+import { InputAction, Keybind } from "./Input.js";
 import gestures from "./gestures.js";
 //TODO: Fix Vectors: import Vector from "./util/vector.js";
 
@@ -11,7 +11,7 @@ const loader = PIXI.loader;
 
 document.addEventListener("contextmenu", event => event.preventDefault());
 
-let app = new PIXI.Application({width: 400, height: 400});
+let app = new PIXI.Application({ width: 400, height: 400 });
 document.body.appendChild(app.view);
 let interaction = app.renderer.plugins.interaction;
 
@@ -26,13 +26,16 @@ let state = play;
 let spiders = [];
 let spawner;
 
-loader.add("Bug.png", "assets/Bug.png")
+loader
+  .add("Bug.png", "assets/Bug.png")
   .on("progress", (loader, resource) => {
     console.debug(`Loading: ${loader.progress}%. Loaded ${resource.url}`);
   })
   .load(setup);
 
 function setup() {
+  const playerContainer = new PIXI.Container();
+
   function createPlayerSprite() {
     let playerSprite = new PIXI.Graphics();
     playerSprite.beginFill(0x6330ff);
@@ -40,45 +43,43 @@ function setup() {
     playerSprite.endFill();
     playerSprite.beginFill(0xffe0bd);
     playerSprite.drawCircle(0, 0, 20);
-    playerSprite.drawPolygon([
-      -15, 15,
-      0, -28,
-      15, 15
-    ]);
+    playerSprite.drawPolygon([-15, 15, 0, -28, 15, 15]);
     playerSprite.endFill();
     playerSprite.pivot.set(0, 0);
     playerSprite.position.set(app.view.width / 2, app.view.height / 2);
     playerSprite.scale.set(1.2);
     playerSprite.rotation = Math.PI;
-    app.stage.addChild(playerSprite);
+    playerContainer.addChild(playerSprite);
+    app.stage.addChild(playerContainer);
     return playerSprite;
   }
 
   player = new Entity(createPlayerSprite());
-  player.moveSpeed.onChange(updateVelocity);//Update velocity accepts no args, so att inst will be ignored
+  player.moveSpeed.onChange(updateVelocity); //Update velocity accepts no args, so att inst will be ignored
 
   spawner = new SpiderSpawner();
-  spawner.pos = {x: 100, y: 100};
+  spawner.pos = { x: 100, y: 100 };
   app.stage.addChild(spawner.sprite);
 
-  let actionWest  = new InputAction("player.move.west" , true, {onChange: updateVelocity});
-  let actionEast  = new InputAction("player.move.east" , true, {onChange: updateVelocity});
-  let actionNorth = new InputAction("player.move.north", true, {onChange: updateVelocity});
-  let actionSouth = new InputAction("player.move.south", true, {onChange: updateVelocity});
+  let actionWest = new InputAction("player.move.west", true, { onChange: updateVelocity });
+  let actionEast = new InputAction("player.move.east", true, { onChange: updateVelocity });
+  let actionNorth = new InputAction("player.move.north", true, { onChange: updateVelocity });
+  let actionSouth = new InputAction("player.move.south", true, { onChange: updateVelocity });
 
   function updateVelocity() {
     let speed = player.moveSpeed.value;
     let h = 0;
     let v = 0;
     /*eslint-disable curly*/
-    if(actionWest.active)   h -= 1;
-    if(actionEast.active)   h += 1;
-    if(actionNorth.active)  v -= 1;
-    if(actionSouth.active)  v += 1;
+    if (actionWest.active) h -= 1;
+    if (actionEast.active) h += 1;
+    if (actionNorth.active) v -= 1;
+    if (actionSouth.active) v += 1;
     /*eslint-enable*/
-    let modifier = (h != 0 && v != 0) //Moving in both axes
-      ? speed / Math.sqrt(2) //adjust for diagonal movement (currently only 8-directional movement)
-      : speed; //Otherwise speed value can be used directly
+    let modifier =
+      h != 0 && v != 0 //Moving in both axes
+        ? speed / Math.sqrt(2) //adjust for diagonal movement (currently only 8-directional movement)
+        : speed; //Otherwise speed value can be used directly
     player.vel.x = h * modifier;
     player.vel.y = v * modifier;
   }
@@ -87,19 +88,19 @@ function setup() {
   let left  = new Keybind(actionWest , "A", {toggle:true}, "KeyA");
   let right = new Keybind(actionEast , "D", {toggle:true, onup: true}, "KeyD");
   */
-  /*let left  = */new Keybind(actionWest , "A", {}, "KeyA");
-  /*let right = */new Keybind(actionEast , "D", {}, "KeyD");
-  /*let up    = */new Keybind(actionNorth, "W", {}, "KeyW");
-  /*let down  = */new Keybind(actionSouth, "S", {}, "KeyS");
+  /*let left  = */ new Keybind(actionWest, "A", {}, "KeyA");
+  /*let right = */ new Keybind(actionEast, "D", {}, "KeyD");
+  /*let up    = */ new Keybind(actionNorth, "W", {}, "KeyW");
+  /*let down  = */ new Keybind(actionSouth, "S", {}, "KeyS");
 
   // Pointers normalize touch and mouse
-  interaction.on("pointerdown", (e) => {
-    player.rotationSpeed.addModifier({key: "combatMode", baseMult: 0.5});
-    player.moveSpeed.addModifier({key: "combatMode", baseMult: 0.3});
-    gestures.startGesture(e, player.sprite);
+  interaction.on("pointerdown", e => {
+    player.rotationSpeed.addModifier({ key: "combatMode", baseMult: 0.5 });
+    player.moveSpeed.addModifier({ key: "combatMode", baseMult: 0.3 });
+    gestures.startGesture(e, playerContainer);
   });
-  interaction.on("pointermove", (e) => gestures.gestureMove(e, player.sprite));
-  interaction.on("pointerup", (e) => {
+  interaction.on("pointermove", e => gestures.gestureMove(e, playerContainer));
+  interaction.on("pointerup", e => {
     player.rotationSpeed.removeModifier("combatMode");
     player.moveSpeed.removeModifier("combatMode");
     gestures.endGesture(e);
@@ -114,11 +115,17 @@ function gameLoop(delta) {
 
 function play(delta) {
   //player.rotateToPoint(Vector.add(interaction.mouse.global, player.pos, {x: -app.view.width / 2, y: -app.view.height / 2}));TODO: Fix Vectors
-  player.rotateToPoint([interaction.mouse.global, player.pos, {x: -app.view.width / 2, y: -app.view.height / 2}].reduce((a, b) => ({x: a.x + b.x, y: a.y + b.y})));//TODO: Fix Vectors
+  player.rotateToPoint(
+    [
+      interaction.mouse.global,
+      player.pos,
+      { x: -app.view.width / 2, y: -app.view.height / 2 },
+    ].reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }))
+  ); //TODO: Fix Vectors
   player.update();
   app.stage.position.set(app.view.width / 2 - player.pos.x, app.view.height / 2 - player.pos.y);
   spawner.rotateToPoint(player.pos);
-  spawner.update(spiders);//TODO: remove passing to update
+  spawner.update(spiders); //TODO: remove passing to update
   /*Disabled spiders
   spiders.forEach((spider) => {
     app.stage.addChild(spider.sprite);

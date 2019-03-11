@@ -10,7 +10,7 @@ export default class Attribute {
 
   __markDirty() {
     this.dirty = true;
-    this.listeners.forEach((l) => l(this.cachedVal));
+    this.listeners.forEach(l => l(this.cachedVal));
   }
 
   /**
@@ -23,7 +23,7 @@ export default class Attribute {
     return listener;
   }
   offChange(listener) {
-    this.listeners.filter((l) => l !== listener);
+    this.listeners.filter(l => l !== listener);
   }
 
   getValue() {
@@ -31,18 +31,18 @@ export default class Attribute {
   }
 
   get value() {
-    if(this.dirty) {
+    if (this.dirty) {
       let val = this.baseValue;
       let basemult = 1;
       let mult = 1;
       this.modifiers.forEach((v, k, m) => {
-        if("baseAdd" in v) {
+        if ("baseAdd" in v) {
           val += v.baseAdd;
         }
-        if("baseMult" in v) {
+        if ("baseMult" in v) {
           basemult += v.baseMult - 1;
         }
-        if("stackingMult" in v) {
+        if ("stackingMult" in v) {
           mult *= v.stackingMult;
         }
       });
@@ -74,15 +74,17 @@ export default class Attribute {
    * attribute.addModifier("exampleModifierKey5", undefined, undefined, 4);
    */
   addModifier(modifier, baseAdd, baseMult, stackingMult) {
-    if([baseAdd, baseMult, stackingMult].some((a) => a !== undefined)) {
-      modifier = {key: modifier, baseAdd, baseMult, stackingMult};
+    if ([baseAdd, baseMult, stackingMult].some(a => a !== undefined)) {
+      modifier = { key: modifier, baseAdd, baseMult, stackingMult };
     }
-    if(!("key" in modifier)) {
+    if (!("key" in modifier)) {
       throw `Attempted to add modifier ${modifier} with no property "key".`;
     }
     let key = modifier.key;
-    if(this.modifiers.has(key)) {
-      throw `Attempted to add modifier ${modifier} with the same key (${key}) as an existing modifier: ${this.modifiers.get(key)}.`;
+    if (this.modifiers.has(key)) {
+      throw `Attempted to add modifier ${modifier} with the same key (${key}) as an existing modifier: ${this.modifiers.get(
+        key
+      )}.`;
     }
     this.modifiers.set(key, modifier);
     this.__markDirty();
@@ -90,7 +92,8 @@ export default class Attribute {
 
   removeModifier(key) {
     let flag = this.modifiers.delete(key);
-    if(flag) {//If it was actually removed
+    if (flag) {
+      //If it was actually removed
       this.__markDirty();
     }
     return flag;

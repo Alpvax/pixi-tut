@@ -14,7 +14,7 @@ export default class SpiderSpawner extends Entity {
     spider.sprite.scale.set(2);
     spider.sprite.anchor.set(0.5, 0.5);
     spider.sprite.rotation = Math.random() * 2 * Math.PI;
-    spider.moveSpeed.addModifier({key: "randomSpeed", baseMult: Math.random() + Math.random()});//Add a random speed modifier, up to 2x
+    spider.moveSpeed.addModifier({ key: "randomSpeed", baseMult: Math.random() + Math.random() }); //Add a random speed modifier, up to 2x
     spider.pos.x = this.pos.x;
     spider.pos.y = this.pos.y;
     return spider;
@@ -22,7 +22,7 @@ export default class SpiderSpawner extends Entity {
 
   update(spiders) {
     super.update();
-    if(spiders.length < 3 && Math.random() * 200 < 1) {
+    if (spiders.length < 3 && Math.random() * 200 < 1) {
       spiders.push(this.spawnSpider());
     }
   }
