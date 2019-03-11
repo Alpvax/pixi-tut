@@ -1,18 +1,18 @@
-{
+module.exports = {
   "root": true,
   "env": {
     "browser": true,
-    "es6": true
+    "es6": true,
   },
   "parserOptions": {
     "ecmaVersion": 6,
-    "sourceType": "module"
+    "sourceType": "module",
   },
   "globals": {
-    "PIXI": false
+    "PIXI": false,
   },
   "rules": {
-    "indent": ["error", 2],
+    "indent": ["error", 2, { "SwitchCase": 1 }],
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "double"],
     "semi": ["error", "always"],
@@ -21,7 +21,7 @@
     "no-unused-vars": [
       "error",
       {
-        "args": "none"
+        "args": "none",
       }
     ],
     "multiline-ternary": ["error", "always-multiline"],
@@ -29,11 +29,11 @@
       "error",
       "1tbs",
       {
-        "allowSingleLine": true
+        "allowSingleLine": true,
       }
     ],
     "curly": ["warn", "all"],
     "eol-last": ["error", "always"],
-    "indent": ["error", 2, { "SwitchCase": 1 }]
+    "comma-dangle": ["error", "always-multiline"],
   }
-}
+};
